@@ -62,6 +62,20 @@
                                :p (flag-p result#)
                                :pad 0})))))
 
+;; (lxi-r16-d16 :b :c) will load byte 3 into b and byte 2 into c
+(defn lxi-r16-d16 [r0 r1]
+  `(let [lsb# (nth ~'memory (+ 1 ~'pc))
+         msb# (nth ~'memory (+ 2 ~'pc))
+         d16# (+ (bit-shift-left msb# 8)
+                 lsb#)]
+     (when ~'debug (println (str "LXI" (str "LXI " ~(clojure.string/upper-case (str r0))) "," (format "#$%x" d16#))))
+     (recur (-> ~'state
+                (assoc-in [:cpu r0] ~'msb)
+                (assoc-in [:cpu r1] ~'lsb)
+                (update-in [:cpu :pc] + 3)))))
+
+;; TODO: continue implementing arithmetic operations
+;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
   (loop [{flags :flags
           interrupt-enabled :interrupt-enabled
@@ -75,15 +89,16 @@
         #_=> (recur state)
 
         0x01
-        #_=> (let [lsb (nth memory (+ 1 pc))
-                   msb (nth memory (+ 2 pc))
-                   d16 (+ (bit-shift-left msb 8)
-                          lsb)]
-               (when debug (println "LXI B," (format "#$%x" d16)))
-               (recur (-> state
-                          (assoc-in [:cpu :b] msb)
-                          (assoc-in [:cpu :c] lsb)
-                          (update-in [:cpu :pc] + 3))))
+        #_=> (lxi-r16-d16 :b :c)
+        ;; #_=> (let [lsb (nth memory (+ 1 pc))
+        ;;            msb (nth memory (+ 2 pc))
+        ;;            d16 (+ (bit-shift-left msb 8)
+        ;;                   lsb)]
+        ;;        (when debug (println "LXI B," (format "#$%x" d16)))
+        ;;        (recur (-> state
+        ;;                   (assoc-in [:cpu :b] msb)
+        ;;                   (assoc-in [:cpu :c] lsb)
+        ;;                   (update-in [:cpu :pc] + 3))))
 
         0x02
         #_=> (let [{a :a
@@ -138,8 +153,8 @@
         ;; 0x10
         ;; #_=> nil
 
-        ;; 0x11
-        ;; #_=> nil
+        0x11
+        #_=> (lxi-r16-d16 :d :e)
 
         ;; 0x12
         ;; #_=> nil
@@ -183,8 +198,8 @@
         ;; 0x20
         ;; #_=> nil
 
-        ;; 0x21
-        ;; #_=> nil
+        0x21
+        #_=> (lxi-r16-d16 :h :l)
 
         ;; 0x22
         ;; #_=> nil
@@ -228,8 +243,15 @@
         ;; 0x30
         ;; #_=> nil
 
-        ;; 0x31
-        ;; #_=> nil
+        0x31
+        #_=> (let [lsb (nth memory (+ 1 pc))
+                   msb (nth memory (+ 2 pc))
+                   d16 (+ (bit-shift-left msb 8)
+                          lsb)]
+               (when debug (println "LXI B," (format "#$%x" d16)))
+               (recur (-> state
+                          (assoc-in [:cpu :sp] d16)
+                          (update-in [:cpu :pc] + 3))))
 
         ;; 0x32
         ;; #_=> nil
