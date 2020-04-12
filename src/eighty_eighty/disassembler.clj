@@ -1,4 +1,4 @@
-(ns space-invaders-clj.disassembler)
+(ns eighty-eighty.disassembler)
 
 (defn slurp-bytes
   "Slurp the bytes from a slurpable thing"

@@ -1,6 +1,6 @@
-(ns space-invaders-clj.core-test
+(ns eighty-eighty.core-test
   (:require [clojure.test :refer :all]
-            [space-invaders-clj.core :refer :all]))
+            [eighty-eighty.core :refer :all]))
 
 (deftest a-test
   (testing "FIXME, I fail."

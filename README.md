@@ -1,4 +1,4 @@
-# space-invaders-clj
+# eighty-eighty
 
 clojure implementation of http://www.emulator101.com/
 
@@ -10,7 +10,7 @@ FIXME
 
 FIXME: explanation
 
-    $ java -jar space-invaders-clj-0.1.0-standalone.jar [args]
+    $ java -jar eighty-eighty-0.1.0-standalone.jar [args]
 
 ## Options
 
