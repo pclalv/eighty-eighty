@@ -108,6 +108,18 @@
         (assoc-in [:cpu :memory adr] a)
         (update-in [:cpu :pc] inc))))
 
+(defn inr [r state]
+  (let [v (-> state :cpu r)
+        result (-> v inc (bit-and 0xff))]
+    (when debug (println "INR" (-> r name clojure.string/upper-case)))
+    (-> state
+        (assoc-in [:cpu r] result)
+        (update-in [:cpu :pc] inc)
+        (update :flags merge {:z (flag-z result)
+                              :s (flag-s result)
+                              :p (flag-p result)
+                              :ac (flag-ac result)}))))                 
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -157,8 +169,8 @@
         ;;                                         :c lsb'})
         ;;                   (update-in [:cpu :pc] inc))))
 
-        ;; 0x04
-        ;; #_=> nil
+        0x04
+        #_=> (recur (inr :b state))
 
         ;; 0x05
         ;; #_=> nil
@@ -181,8 +193,8 @@
         ;; 0xb
         ;; #_=> nil
 
-        ;; 0x0c
-        ;; #_=> nil
+        0x0c
+        #_=> (recur (inr :c state))
 
         ;; 0x0d
         ;; #_=> nil
@@ -205,8 +217,8 @@
         0x13
         #_=> (inx :d :e)
 
-        ;; 0x14
-        ;; #_=> nil
+        0x14
+        #_=> (recur (inr :d state))
 
         ;; 0x15
         ;; #_=> nil
@@ -226,8 +238,8 @@
         ;; 0x1b
         ;; #_=> nil
 
-        ;; 0x1c
-        ;; #_=> nil
+        0x1c
+        #_=> (recur (inr :e state))
 
         ;; 0x1d
         ;; #_=> nil
@@ -250,8 +262,8 @@
         0x23
         #_=> (inx :h :l)
 
-        ;; 0x24
-        ;; #_=> nil
+        0x24
+        #_=> (recur (inr :h state))
 
         ;; 0x25
         ;; #_=> nil
@@ -274,8 +286,8 @@
         ;; 0x2b
         ;; #_=> nil
 
-        ;; 0x2c
-        ;; #_=> nil
+        0x2c
+        #_=> (recur (inr :l state))
 
         ;; 0x2e
         ;; #_=> nil
@@ -332,8 +344,8 @@
 
         ;; 0x3b nil
 
-        ;; 0x3c
-        ;; #_=> nil
+        0x3c
+        #_=> (recur (inr :a state))
 
         ;; 0x3d
         ;; #_=> nil
