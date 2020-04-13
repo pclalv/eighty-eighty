@@ -81,8 +81,8 @@
                                       ~r1 lsb'#})
                 (update-in [:cpu :pc] inc)))))
 
-;; (lxi-r16-d16 :b :c) will load byte 3 into b and byte 2 into c
-(defn lxi-r16-d16 [r0 r1]
+;; (lxi :b :c) will load byte 3 into b and byte 2 into c
+(defn lxi [r0 r1]
   `(let [lsb# (nth ~'memory (+ 1 ~'pc))
          msb# (nth ~'memory (+ 2 ~'pc))
          d16# (+ (bit-shift-left msb# 8)
@@ -108,7 +108,7 @@
         #_=> (recur state)
 
         0x01
-        #_=> (lxi-r16-d16 :b :c)
+        #_=> (lxi :b :c)
         ;; #_=> (let [lsb (nth memory (+ 1 pc))
         ;;            msb (nth memory (+ 2 pc))
         ;;            d16 (+ (bit-shift-left msb 8)
@@ -190,7 +190,7 @@
         ;; #_=> nil
 
         0x11
-        #_=> (lxi-r16-d16 :d :e)
+        #_=> (lxi :d :e)
 
         ;; 0x12
         ;; #_=> nil
@@ -235,7 +235,7 @@
         ;; #_=> nil
 
         0x21
-        #_=> (lxi-r16-d16 :h :l)
+        #_=> (lxi :h :l)
 
         ;; 0x22
         ;; #_=> nil
