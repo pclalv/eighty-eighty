@@ -158,23 +158,6 @@
 
         0x03
         #_=> (recur (inx :b :c state))
-        ;; #_=> (let [{msb :b
-        ;;             lsb :c} cpu
-        ;;            d16 (+ (bit-shift-left msb 8)
-        ;;                   lsb)
-        ;;            result (-> d16
-        ;;                       inc
-        ;;                       (bit-and 0xffff))
-        ;;            msb' (-> result
-        ;;                  (bit-shift-right 8)
-        ;;                  (bit-and 0xff))
-        ;;            lsb' (-> result
-        ;;                  (bit-and 0xff))]
-        ;;        (println "INX B")
-        ;;        (recur (-> state
-        ;;                   (update [:cpu] merge {:b msb'
-        ;;                                         :c lsb'})
-        ;;                   (update-in [:cpu :pc] inc))))
 
         0x04
         #_=> (recur (inr :b state))
