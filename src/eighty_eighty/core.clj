@@ -8,8 +8,7 @@
    :s 0
    :p 0
    :cy 0
-   :ac 0
-   :pad 0})
+   :ac 0})
 
 (def cpu
   {:a 0
@@ -44,6 +43,10 @@
   ;; FIXME
   0)
 
+(defn flags-ac [n]
+  ;; FIXME
+  0)
+
 (defmacro add-a-r [r]
   `(let [{:keys [a ~r]} ~'cpu
           result# (+ ~'a ~r)]
@@ -59,8 +62,8 @@
                 (assoc :flags {:z (flag-z result#)
                                :s (flag-s result#)
                                :cy (flag-cy result#)
-                               :p (flag-p result#)
-                               :pad 0})))))
+                               :ac (flag-ac result#)
+                               :p (flag-p result#)})))))
 
 (defmacro inx [r0 r1]
   `(let [{msb# ~r0
