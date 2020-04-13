@@ -43,7 +43,7 @@
   ;; FIXME
   0)
 
-(defn flags-ac [n]
+(defn flag-ac [n]
   ;; FIXME
   0)
 
