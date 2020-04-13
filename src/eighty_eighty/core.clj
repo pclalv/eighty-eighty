@@ -120,6 +120,18 @@
                               :p (flag-p result)
                               :ac (flag-ac result)}))))                 
 
+(defn dcr [r state]
+  (let [v (-> state :cpu r)
+        result (-> v dec (bit-and 0xff))]
+    (when debug (println "DCR" (-> r name clojure.string/upper-case)))
+    (-> state
+        (assoc-in [:cpu r] result)
+        (update-in [:cpu :pc] inc)
+        (update :flags merge {:z (flag-z result)
+                              :s (flag-s result)
+                              :p (flag-p result)
+                              :ac (flag-ac result)}))))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -172,8 +184,8 @@
         0x04
         #_=> (recur (inr :b state))
 
-        ;; 0x05
-        ;; #_=> nil
+        0x05
+        #_=> (recur (dcr :b state))
 
         ;; 0x06
         ;; #_=> nil
@@ -196,8 +208,8 @@
         0x0c
         #_=> (recur (inr :c state))
 
-        ;; 0x0d
-        ;; #_=> nil
+        0x0d
+        #_=> (recur (dcr :c state))
 
         ;; 0x0e
         ;; #_=> nil
@@ -220,8 +232,8 @@
         0x14
         #_=> (recur (inr :d state))
 
-        ;; 0x15
-        ;; #_=> nil
+        0x15
+        #_=> (recur (dcr :d state))
 
         ;; 0x16
         ;; #_=> nil
@@ -241,8 +253,8 @@
         0x1c
         #_=> (recur (inr :e state))
 
-        ;; 0x1d
-        ;; #_=> nil
+        0x1d
+        #_=> (recur (dcr :e state))
 
         ;; 0x1e
         ;; #_=> nil
@@ -265,8 +277,8 @@
         0x24
         #_=> (recur (inr :h state))
 
-        ;; 0x25
-        ;; #_=> nil
+        0x25
+        #_=> (recur (dcr :h state))
 
         ;; 0x26
         ;; #_=> nil
@@ -288,6 +300,9 @@
 
         0x2c
         #_=> (recur (inr :l state))
+
+        0x2d
+        #_=> (recur (dcr :l state))
 
         ;; 0x2e
         ;; #_=> nil
@@ -334,8 +349,18 @@
                                          :p (flag-p result)
                                          :ac (flag-ac result)})))
 
-        ;; 0x35
-        ;; #_=> nil
+        0x35
+        #_=> (let [hl (-> state :cpu :hl)
+                   v (-> state :memory (nth hl))
+                   result (-> hl dec (bit-and 0xff))]
+               (when debug (println "DCR M"))
+               (-> state
+                   (assoc-in [:memory hl] result)
+                   (update-in [:cpu :pc] inc)
+                   (update :flags merge {:z (flag-z result)
+                                         :s (flag-s result)
+                                         :p (flag-p result)
+                                         :ac (flag-ac result)})))
 
         ;; 0x36
         ;; #_=> nil
@@ -357,8 +382,8 @@
         0x3c
         #_=> (recur (inr :a state))
 
-        ;; 0x3d
-        ;; #_=> nil
+        0x3d
+        #_=> (recur (dcr :a state))
 
         ;; 0x3e
         ;; #_=> nil
