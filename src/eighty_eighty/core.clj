@@ -95,6 +95,18 @@
                 (assoc-in [:cpu r1] ~'lsb)
                 (update-in [:cpu :pc] + 3)))))
 
+(defn stax [r-msb r-lsb state]
+  (let [{a :a
+         msb r-msb
+         lsb r-lsb} state
+        adr (bit-and 0xff
+                     (+ (bit-shift-left msb 8)
+                        lsb))]
+    (when debug (println "STAX" (name r-msb)))
+    (-> state
+        (assoc-in [:cpu :memory adr] a)
+        (update-in [:cpu :pc] inc))))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -122,16 +134,7 @@
         ;;                   (update-in [:cpu :pc] + 3))))
 
         0x02
-        #_=> (let [{a :a
-                    msb :b
-                    lsb :c} cpu
-                   adr (bit-and 0xff
-                                (+ (bit-shift-left msb 8)
-                                   lsb))]
-               (when debug (println "STAX B"))
-               (recur (-> state
-                          (assoc-in [:cpu :memory adr] a)
-                          (update-in [:cpu :pc] inc))))
+        #_=> (recur (stax :b :c state))
 
         0x03
         #_=> (inx :b :c)
@@ -195,8 +198,8 @@
         0x11
         #_=> (lxi :d :e)
 
-        ;; 0x12
-        ;; #_=> nil
+        0x12
+        #_=> (recur (stax :d :e state))
 
         0x13
         #_=> (inx :d :e)
