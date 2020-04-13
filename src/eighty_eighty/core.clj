@@ -78,7 +78,7 @@
                    (bit-and 0xff))
          lsb'# (-> result#
                    (bit-and 0xff))]
-     (println "INX B")
+     (when ~'debug (println "INX B"))
      (recur (-> ~'state
                 (update [:cpu] merge {~r0 msb'#
                                       ~r1 lsb'#})
