@@ -84,17 +84,19 @@
                                       ~r1 lsb'#})
                 (update-in [:cpu :pc] inc)))))
 
-;; (lxi :b :c) will load byte 3 into b and byte 2 into c
-(defmacro lxi [r0 r1]
-  `(let [lsb# (nth ~'memory (+ 1 ~'pc))
-         msb# (nth ~'memory (+ 2 ~'pc))
-         d16# (+ (bit-shift-left msb# 8)
-                 lsb#)]
-     (when ~'debug (println (str "LXI" (str "LXI " ~(clojure.string/upper-case (str r0))) "," (format "#$%x" d16#))))
-     (recur (-> ~'state
-                (assoc-in [:cpu r0] ~'msb)
-                (assoc-in [:cpu r1] ~'lsb)
-                (update-in [:cpu :pc] + 3)))))
+;; (lxi :b :c state) will load byte 3 into b and byte 2 into c
+(defn lxi [r-msb r-lsb state]
+  (let [pc (-> state :cpu :pc)
+        memory (:memory state)
+        lsb (nth memory (+ 1 pc))
+        msb (nth memory (+ 2 pc))
+        d16 (+ (bit-shift-left msb 8)
+               lsb)]
+    (when debug (println (str "LXI " (clojure.string/upper-case (str r-msb))) "," (format "#$%x" d16)))
+    (-> state
+        (assoc-in [:cpu r-msb] msb)
+        (assoc-in [:cpu r-lsb] lsb)
+        (update-in [:cpu :pc] + 3))))
 
 (defn stax [r-msb r-lsb state]
   (let [{a :a
@@ -147,16 +149,7 @@
         #_=> (recur state)
 
         0x01
-        #_=> (lxi :b :c)
-        ;; #_=> (let [lsb (nth memory (+ 1 pc))
-        ;;            msb (nth memory (+ 2 pc))
-        ;;            d16 (+ (bit-shift-left msb 8)
-        ;;                   lsb)]
-        ;;        (when debug (println "LXI B," (format "#$%x" d16)))
-        ;;        (recur (-> state
-        ;;                   (assoc-in [:cpu :b] msb)
-        ;;                   (assoc-in [:cpu :c] lsb)
-        ;;                   (update-in [:cpu :pc] + 3))))
+        #_=> (recur (lxi :b :c state))
 
         0x02
         #_=> (recur (stax :b :c state))
@@ -221,7 +214,7 @@
         ;; #_=> nil
 
         0x11
-        #_=> (lxi :d :e)
+        #_=> (recur (lxi :d :e state))
 
         0x12
         #_=> (recur (stax :d :e state))
@@ -266,7 +259,7 @@
         ;; #_=> nil
 
         0x21
-        #_=> (lxi :h :l)
+        #_=> (recur (lxi :h :l state))
 
         ;; 0x22
         ;; #_=> nil
