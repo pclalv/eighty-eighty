@@ -59,10 +59,11 @@
                 ;; hence the (bit-and ... 0xff)
                 (assoc-in [:cpu :a] (bit-and result# 0xff))
                 (update-in [:cpu :pc] inc)
-                (merge :flags {:z (flag-z result#)
-                               :s (flag-s result#)
-                               :p (flag-p result#)
-                               :ac (flag-ac result#)})))))
+                (update :flags merge {:z (flag-z result#)
+                                      :s (flag-s result#)
+                                      :p (flag-p result#)
+                                      :cy (flag-cy result#)
+                                      :ac (flag-ac result#)})))))
 
 (defmacro inx [r0 r1]
   `(let [{msb# ~r0
