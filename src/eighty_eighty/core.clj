@@ -585,9 +585,9 @@
                           (update-in [:cpu :pc] inc)
                           (assoc :flags {:z (flag-z result)
                                          :s (flag-s result)
-                                         :cy (flag-cy result)
                                          :p (flag-p result)
-                                         :pad 0}))))
+                                         :cy (flag-cy result)
+                                         :ac (flag-ac result)}))))
 
         0x87
         #_=> (recur (add :a state))
