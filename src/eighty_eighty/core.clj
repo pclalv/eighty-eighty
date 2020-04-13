@@ -59,15 +59,14 @@
 (defn add [r state]
   (let [{a :a
          v r} (:cpu state)
+        ;; "I am emulating the 8-bit math instructions by using a
+        ;; 16-bit number. That makes it easy to figure out if the math
+        ;; generated a carry out of it."
+        ;; hence the (bit-and 0xff)
         result (-> (+ a v)
                    (bit-and 0xff))]
     (when debug (println "ADD" (-> r name clojure.string/upper-case)))
     (-> state
-        ;; "I am emulating the 8-bit math
-        ;; instructions by using a 16-bit
-        ;; number. That makes it easy to figure out
-        ;; if the math generated a carry out of it."
-        ;; hence the (bit-and ... 0xff)
         (assoc-in [:cpu :a] result)
         (update-in [:cpu :pc] inc)
         (update :flags merge {:z (flag-z result)
