@@ -65,24 +65,24 @@
                                       :cy (flag-cy result#)
                                       :ac (flag-ac result#)})))))
 
-(defmacro inx [r0 r1]
-  `(let [{msb# ~r0
-          lsb# ~r1} ~'cpu
-         d16# (+ (bit-shift-left msb# 8)
-                 lsb#)
-         result# (-> d16#
-                     inc
-                     (bit-and 0xffff))
-         msb'# (-> result#
-                   (bit-shift-right 8)
-                   (bit-and 0xff))
-         lsb'# (-> result#
-                   (bit-and 0xff))]
-     (when ~'debug (println "INX B"))
-     (recur (-> ~'state
-                (update [:cpu] merge {~r0 msb'#
-                                      ~r1 lsb'#})
-                (update-in [:cpu :pc] inc)))))
+(defn inx [r-msb r-lsb state]
+  (let [{msb r-msb
+         lsb r-lsb} cpu
+        d16 (+ (bit-shift-left msb 8)
+               lsb)
+        result (-> d16
+                   inc
+                   (bit-and 0xffff))
+        msb' (-> result
+                 (bit-shift-right 8)
+                 (bit-and 0xff))
+        lsb' (-> result
+                 (bit-and 0xff))]
+    (when debug (println "INX" r-msb))
+    (recur (-> state
+               (update [:cpu] merge {r-msb msb'
+                                     r-lsb lsb'})
+               (update-in [:cpu :pc] inc)))))
 
 ;; (lxi :b :c state) will load byte 3 into b and byte 2 into c
 (defn lxi [r-msb r-lsb state]
@@ -155,7 +155,7 @@
         #_=> (recur (stax :b :c state))
 
         0x03
-        #_=> (inx :b :c)
+        #_=> (recur (inx :b :c state))
         ;; #_=> (let [{msb :b
         ;;             lsb :c} cpu
         ;;            d16 (+ (bit-shift-left msb 8)
@@ -220,7 +220,7 @@
         #_=> (recur (stax :d :e state))
 
         0x13
-        #_=> (inx :d :e)
+        #_=> (recur (inx :d :e state))
 
         0x14
         #_=> (recur (inr :d state))
@@ -265,7 +265,7 @@
         ;; #_=> nil
 
         0x23
-        #_=> (inx :h :l)
+        #_=> (recur (inx :h :l state))
 
         0x24
         #_=> (recur (inr :h state))
@@ -326,7 +326,7 @@
                               (bit-and 0xffff))]                   
                (println "INX SP")
                (recur (-> state
-                          (update [:cpu] merge {:sp sp})
+                          (assoc [:cpu :sp] sp)
                           (update-in [:cpu :pc] inc))))
 
         0x34
