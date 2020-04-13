@@ -47,23 +47,25 @@
   ;; FIXME
   0)
 
-(defmacro add-a-r [r]
-  `(let [{:keys [a ~r]} ~'cpu
-          result# (+ ~'a ~r)]
-     (when ~'debug (println (str "ADD " ~(clojure.string/upper-case (str r)))))
-     (recur (-> ~'state
-                ;; "I am emulating the 8-bit math
-                ;; instructions by using a 16-bit
-                ;; number. That makes it easy to figure out
-                ;; if the math generated a carry out of it."
-                ;; hence the (bit-and ... 0xff)
-                (assoc-in [:cpu :a] (bit-and result# 0xff))
-                (update-in [:cpu :pc] inc)
-                (update :flags merge {:z (flag-z result#)
-                                      :s (flag-s result#)
-                                      :p (flag-p result#)
-                                      :cy (flag-cy result#)
-                                      :ac (flag-ac result#)})))))
+(defn add [r state]
+  (let [{a :a
+         v r} (:cpu state)
+        result (-> (+ a v)
+                   (bit-and 0xff))]
+    (when debug (println "ADD" (-> r name clojure.string/upper-case)))
+    (-> state
+        ;; "I am emulating the 8-bit math
+        ;; instructions by using a 16-bit
+        ;; number. That makes it easy to figure out
+        ;; if the math generated a carry out of it."
+        ;; hence the (bit-and ... 0xff)
+        (assoc-in [:cpu :a] result)
+        (update-in [:cpu :pc] inc)
+        (update :flags merge {:z (flag-z result)
+                              :s (flag-s result)
+                              :p (flag-p result)
+                              :cy (flag-cy result)
+                              :ac (flag-ac result)}))))
 
 (defn inx [r-msb r-lsb state]
   (let [{msb r-msb
@@ -545,34 +547,36 @@
         ;; #_=> nil
 
         0x80
-        #_=> (add-a-r b)
+        #_=> (recur (add :b state))
 
         0x81
-        #_=> (add-a-r c)
+        #_=> (recur (add :c state))
 
         0x82
-        #_=> (add-a-r d)
+        #_=> (recur (add :d state))
 
         0x83
-        #_=> (add-a-r e)
+        #_=> (recur (add :e state))
 
         0x84
-        #_=> (add-a-r h)
+        #_=> (recur (add :h state))
 
         0x85
-        #_=> (add-a-r l)
+        #_=> (recur (add :l state))
 
         0x86
         #_=> (let [{a :a
                     msb :h
                     lsb :l} cpu
-                   m (+ (bit-shift-left msb 8)
-                        lsb)
-                   result (+ a m)]
+                   hl (+ (bit-shift-left msb 8)
+                         lsb)
+                   m (-> state :cpu (nth hl))
+                   result (-> (+ a m)
+                              (bit-and 0xff))]
                (when debug (println "ADD M"))
                (recur (-> state
-                          (assoc-in [:cpu :a] (bit-and result 0xff))
-                          (update-in [:cpu :pc] + 2)
+                          (assoc-in [:cpu :a] result)
+                          (update-in [:cpu :pc] inc)
                           (assoc :flags {:z (flag-z result)
                                          :s (flag-s result)
                                          :cy (flag-cy result)
@@ -580,7 +584,7 @@
                                          :pad 0}))))
 
         0x87
-        #_=> (add-a-r a)
+        #_=> (recur (add :a state))
 
         ;; 0x88
         ;; #_=> nil
