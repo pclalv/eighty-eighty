@@ -24,6 +24,15 @@
    :flags flags
    :interrupt-enabled true})
 
+(defn get-hl [state]
+  (let [{msb :h
+         lsb :l} (:cpu state)
+        hl (-> (+ (bit-shift-left msb 8)
+                  lsb)
+               (bit-and 0xffff))]
+    hl))
+  
+
 (defn flag-z [n]
   (if (= 0 (bit-and n 0xff))
     1
@@ -315,7 +324,7 @@
                           (update-in [:cpu :pc] inc))))
 
         0x34
-        #_=> (let [hl (-> state :cpu :hl)
+        #_=> (let [hl (get-hl state)
                    v (-> state :memory (nth hl))
                    result (-> hl inc (bit-and 0xff))]
                (when debug (println "INR M"))
@@ -328,7 +337,7 @@
                                          :ac (flag-ac result)})))
 
         0x35
-        #_=> (let [hl (-> state :cpu :hl)
+        #_=> (let [hl (get-hl state)
                    v (-> state :memory (nth hl))
                    result (-> hl dec (bit-and 0xff))]
                (when debug (println "DCR M"))
@@ -548,11 +557,8 @@
         #_=> (recur (add :l state))
 
         0x86
-        #_=> (let [{a :a
-                    msb :h
-                    lsb :l} cpu
-                   hl (+ (bit-shift-left msb 8)
-                         lsb)
+        #_=> (let [a (-> state :cpu :a)
+                   hl (get-hl state)
                    m (-> state :cpu (nth hl))
                    result (-> (+ a m)
                               (bit-and 0xff))]
