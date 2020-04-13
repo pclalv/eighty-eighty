@@ -123,8 +123,9 @@
         #_=> (let [{a :a
                     msb :b
                     lsb :c} cpu
-                   adr (+ (bit-shift-left msb 8)
-                          lsb)]
+                   adr (bit-and 0xff
+                                (+ (bit-shift-left msb 8)
+                                   lsb))]
                (when debug (println "STAX B"))
                (recur (-> state
                           (assoc-in [:cpu :memory adr] a)
