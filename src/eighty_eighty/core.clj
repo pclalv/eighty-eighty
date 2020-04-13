@@ -145,6 +145,17 @@
                               :p (flag-p result)
                               :ac (flag-ac result)}))))
 
+(defn mvi [r state]
+  (let [pc (-> state :cpu :pc)
+        d8 (-> state :memory (nth (inc pc)))]
+    (when debug (println "MVI" (str (-> r name clojure.string/upper-case)
+                                    ","
+                                    d8)))
+    (-> state
+        (assoc-in [:cpu r] d8)
+        (update-in [:cpu :pc] + 2))))
+        
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -174,8 +185,8 @@
         0x05
         #_=> (recur (dcr :b state))
 
-        ;; 0x06
-        ;; #_=> nil
+        0x06
+        #_=> (recur (mvi :b state))
 
         ;; 0x07
         ;; #_=> nil
@@ -198,8 +209,8 @@
         0x0d
         #_=> (recur (dcr :c state))
 
-        ;; 0x0e
-        ;; #_=> nil
+        0x0e
+        #_=> (recur (mvi :c state))
 
         ;; 0x0f
         ;; #_=> nil
@@ -222,8 +233,8 @@
         0x15
         #_=> (recur (dcr :d state))
 
-        ;; 0x16
-        ;; #_=> nil
+        0x16
+        #_=> (recur (mvi :d state))
 
         ;; 0x18
         ;; #_=> nil
@@ -243,8 +254,8 @@
         0x1d
         #_=> (recur (dcr :e state))
 
-        ;; 0x1e
-        ;; #_=> nil
+        0x1e
+        #_=> (recur (mvi :e state))
 
         ;; 0x1f
         ;; #_=> nil
@@ -267,8 +278,8 @@
         0x25
         #_=> (recur (dcr :h state))
 
-        ;; 0x26
-        ;; #_=> nil
+        0x26
+        #_=> (recur (mvi :h state))
 
         ;; 0x27
         ;; #_=> nil
@@ -291,8 +302,8 @@
         0x2d
         #_=> (recur (dcr :l state))
 
-        ;; 0x2e
-        ;; #_=> nil
+        0x2e
+        #_=> (recur (mvi :l state))
 
         ;; 0x2f
         ;; #_=> nil
@@ -349,8 +360,14 @@
                                          :p (flag-p result)
                                          :ac (flag-ac result)})))
 
-        ;; 0x36
-        ;; #_=> nil
+        0x36
+        #_=> (let [hl (get-hl state)
+                   d8 (-> state :memory (nth (inc pc)))]
+               (when debug (println "MVI" (str "M,"
+                                               d8)))
+               (-> state
+                   (assoc-in [:memory hl] d8)
+                   (update-in [:cpu :pc] + 2)))
 
         ;; 0x37
         ;; #_=> nil
@@ -372,8 +389,8 @@
         0x3d
         #_=> (recur (dcr :a state))
 
-        ;; 0x3e
-        ;; #_=> nil
+        0x3e
+        #_=> (recur (mvi :a state))
 
         ;; 0x3f
         ;; #_=> nil
