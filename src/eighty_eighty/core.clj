@@ -62,6 +62,25 @@
                                :p (flag-p result#)
                                :pad 0})))))
 
+(defmacro inx [r0 r1]
+  `(let [{msb# ~r0
+          lsb# ~r1} ~'cpu
+         d16# (+ (bit-shift-left msb# 8)
+                 lsb#)
+         result# (-> d16#
+                     inc
+                     (bit-and 0xffff))
+         msb'# (-> result#
+                   (bit-shift-right 8)
+                   (bit-and 0xff))
+         lsb'# (-> result#
+                   (bit-and 0xff))]
+     (println "INX B")
+     (recur (-> ~'state
+                (update [:cpu] merge {~r0 msb'#
+                                      ~r1 lsb'#})
+                (update-in [:cpu :pc] inc)))))
+
 ;; (lxi-r16-d16 :b :c) will load byte 3 into b and byte 2 into c
 (defn lxi-r16-d16 [r0 r1]
   `(let [lsb# (nth ~'memory (+ 1 ~'pc))
@@ -111,8 +130,25 @@
                           (assoc-in [:cpu :memory adr] a)
                           (update-in [:cpu :pc] inc))))
 
-        ;; 0x03
-        ;; #_=> nil
+        0x03
+        #_=> (inx :b :c)
+        ;; #_=> (let [{msb :b
+        ;;             lsb :c} cpu
+        ;;            d16 (+ (bit-shift-left msb 8)
+        ;;                   lsb)
+        ;;            result (-> d16
+        ;;                       inc
+        ;;                       (bit-and 0xffff))
+        ;;            msb' (-> result
+        ;;                  (bit-shift-right 8)
+        ;;                  (bit-and 0xff))
+        ;;            lsb' (-> result
+        ;;                  (bit-and 0xff))]
+        ;;        (println "INX B")
+        ;;        (recur (-> state
+        ;;                   (update [:cpu] merge {:b msb'
+        ;;                                         :c lsb'})
+        ;;                   (update-in [:cpu :pc] inc))))
 
         ;; 0x04
         ;; #_=> nil
