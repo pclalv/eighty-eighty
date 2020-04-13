@@ -284,9 +284,9 @@
                    msb (nth memory (+ 2 pc))
                    d16 (+ (bit-shift-left msb 8)
                           lsb)]
-               (when debug (println "LXI B," (format "#$%x" d16)))
+               (when debug (println "LXI SP," (format "#$%x" d16)))
                (recur (-> state
-                          (assoc-in [:cpu :sp] d16)
+                          (assoc-in [:cpu :sp] (bit-and d16 0xffff))
                           (update-in [:cpu :pc] + 3))))
 
         ;; 0x32
