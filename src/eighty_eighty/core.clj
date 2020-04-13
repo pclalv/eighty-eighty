@@ -321,8 +321,18 @@
                           (update [:cpu] merge {:sp sp})
                           (update-in [:cpu :pc] inc))))
 
-        ;; 0x34
-        ;; #_=> nil
+        0x34
+        #_=> (let [hl (-> state :cpu :hl)
+                   v (-> state :memory (nth hl))
+                   result (-> hl inc (bit-and 0xff))]
+               (when debug (println "INR M"))
+               (-> state
+                   (assoc-in [:memory hl] result)
+                   (update-in [:cpu :pc] inc)
+                   (update :flags merge {:z (flag-z result)
+                                         :s (flag-s result)
+                                         :p (flag-p result)
+                                         :ac (flag-ac result)})))
 
         ;; 0x35
         ;; #_=> nil
