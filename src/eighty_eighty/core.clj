@@ -85,7 +85,7 @@
                 (update-in [:cpu :pc] inc)))))
 
 ;; (lxi :b :c) will load byte 3 into b and byte 2 into c
-(defn lxi [r0 r1]
+(defmacro lxi [r0 r1]
   `(let [lsb# (nth ~'memory (+ 1 ~'pc))
          msb# (nth ~'memory (+ 2 ~'pc))
          d16# (+ (bit-shift-left msb# 8)
