@@ -195,8 +195,8 @@
         ;; 0x12
         ;; #_=> nil
 
-        ;; 0x13
-        ;; #_=> nil
+        0x13
+        #_=> (inx :d :e)
 
         ;; 0x14
         ;; #_=> nil
@@ -240,8 +240,8 @@
         ;; 0x22
         ;; #_=> nil
 
-        ;; 0x23
-        ;; #_=> nil
+        0x23
+        #_=> (inx :h :l)
 
         ;; 0x24
         ;; #_=> nil
@@ -291,6 +291,16 @@
 
         ;; 0x32
         ;; #_=> nil
+
+        0x33
+        #_=> (let [sp (:sp cpu)
+                   result (-> sp
+                              inc
+                              (bit-and 0xffff))]                   
+               (println "INX SP")
+               (recur (-> state
+                          (update [:cpu] merge {:sp sp})
+                          (update-in [:cpu :pc] inc))))
 
         ;; 0x34
         ;; #_=> nil
