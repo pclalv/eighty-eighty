@@ -183,6 +183,34 @@
         (assoc-in [:cpu :a] v)
         (update-in [:cpu :pc] inc))))
 
+(defn dcx [r-msb state]
+  (let [r16 (get-r16 r-msb state)
+        r-lsb (case r
+                :b :c
+                :d :e
+                :h :l)
+        result (-> r16
+                   dec 
+                   (bit-and 0xffff))
+        r-msb' (bit-shift-right result 8)
+        r-lsb' (bit-and result 0xff)]
+    (when debug (println "DCX" (-> r-msb name clojure.string/upper-case)))
+    (-> state
+        (assoc-in [:cpu r-msb] r-msb')
+        (assoc-in [:cpu r-lsb] r-lsb')
+        (update-in [:cpu :pc] inc))))
+
+(defn dcx-sp [state]
+  (let [result (-> state
+                   :cpu
+                   :sp
+                   dec 
+                   (bit-and 0xffff))]
+    (when debug (println "DCX SP"))
+    (-> state
+        (assoc-in [:cpu :sp] result)
+        (update-in [:cpu :pc] inc))))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -227,8 +255,8 @@
         ;; 0x08
         ;; #_=> nil
 
-        ;; 0xb
-        ;; #_=> nil
+        0x0b
+        #_=> (recur (dcx :b state))
 
         0x0c
         #_=> (recur (inr :c state))
@@ -272,8 +300,8 @@
         0x1a
         #_=> (result (ldax :d state))
 
-        ;; 0x1b
-        ;; #_=> nil
+        0x1b
+        #_=> (recur (dcx :d state))
 
         0x1c
         #_=> (recur (inr :e state))
@@ -320,8 +348,8 @@
         ;; 0x2a
         ;; #_=> nil
 
-        ;; 0x2b
-        ;; #_=> nil
+        0x2b
+        #_=> (recur (dcx :h state))
 
         0x2c
         #_=> (recur (inr :l state))
@@ -415,7 +443,8 @@
         ;; 0x3a
         ;; #_=> nil
 
-        ;; 0x3b nil
+        0x3b
+        #_=> (recur (dcx-sp state))
 
         0x3c
         #_=> (recur (inr :a state))
