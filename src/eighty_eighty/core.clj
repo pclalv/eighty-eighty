@@ -81,25 +81,6 @@
                               :cy (flag-cy result)
                               :ac (flag-ac result)}))))
 
-(defn inx [r-msb r-lsb state]
-  (let [{msb r-msb
-         lsb r-lsb} cpu
-        d16 (+ (bit-shift-left msb 8)
-               lsb)
-        result (-> d16
-                   inc
-                   (bit-and 0xffff))
-        msb' (-> result
-                 (bit-shift-right 8)
-                 (bit-and 0xff))
-        lsb' (-> result
-                 (bit-and 0xff))]
-    (when debug (println "INX" r-msb))
-    (-> state
-        (update [:cpu] merge {r-msb msb'
-                              r-lsb lsb'})
-        (update-in [:cpu :pc] inc))))
-
 ;; (lxi :b :c state) will load byte 3 into b and byte 2 into c
 (defn lxi [r-msb r-lsb state]
   (let [pc (-> state :cpu :pc)
@@ -124,6 +105,25 @@
     (when debug (println "STAX" (name r-msb)))
     (-> state
         (assoc-in [:cpu :memory adr] a)
+        (update-in [:cpu :pc] inc))))
+
+(defn inx [r-msb r-lsb state]
+  (let [{msb r-msb
+         lsb r-lsb} cpu
+        d16 (+ (bit-shift-left msb 8)
+               lsb)
+        result (-> d16
+                   inc
+                   (bit-and 0xffff))
+        msb' (-> result
+                 (bit-shift-right 8)
+                 (bit-and 0xff))
+        lsb' (-> result
+                 (bit-and 0xff))]
+    (when debug (println "INX" r-msb))
+    (-> state
+        (update [:cpu] merge {r-msb msb'
+                              r-lsb lsb'})
         (update-in [:cpu :pc] inc))))
 
 (defn inr [r state]
