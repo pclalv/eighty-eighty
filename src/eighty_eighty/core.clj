@@ -342,7 +342,7 @@
         #_=> (recur (ral state))
 
         ;; 0x18
-        ;; #_=> nil
+        ;; deliberately undefined
 
         0x19
         #_=> (recur (dad :d state))
