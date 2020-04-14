@@ -246,6 +246,9 @@
         ;; 0x07
         ;; #_=> nil
 
+        ;; 0x08
+        ;; deliberately undefined
+
         0x09
         #_=> (recur (dad :b state))
 
