@@ -39,12 +39,17 @@
                 (bit-and 0xffff))]
     r16))
 
+;;;;;;;;;;;
+;; flags ;;
+;;;;;;;;;;;
+
 (defn flag-z [n]
   (if (= 0 (bit-and n 0xff))
     1
     0))
 
 (defn flag-s [n]
+  ;; grab the MSB
   (if (not= 0 (bit-and n 0x80))
     1
     0))
