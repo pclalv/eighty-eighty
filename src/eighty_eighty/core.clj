@@ -49,8 +49,8 @@
     1
     0))
 
-(defn flag-cy [n]
-  (if (> n 0xff)
+(defn flag-cy [a0 a1]
+  (if (> (+ a0 a1) 0xff)
     1
     0))
 
@@ -78,8 +78,8 @@
         (update :flags merge {:z (flag-z result)
                               :s (flag-s result)
                               :p (flag-p result)
-                              :cy (flag-cy result)
                               :ac (flag-ac result)}))))
+                              :cy (flag-cy a v)
 
 ;; (lxi :b :c state) will load byte 3 into b and byte 2 into c
 (defn lxi [r-msb r-lsb state]
@@ -227,13 +227,17 @@
         result (bit-and (+ hl r16)
                         0xffff)
         h' (bit-shift-right result 8)
-        l' (bit-and result 0xff)]
+        l' (bit-and result 0xff)
+        ;; 16-bit carry; extract into fn?
+        cy (-> (+ hl r16)
+               (bit-and 0xffff0000)
+               (> 0))]
     (when debug (println "DAD" (-> r-msb name clojure.string/upper-case)))
     (-> state
         (assoc-in [:cpu :h] h')
         (assoc-in [:cpu :l] l')
         (update-in [:cpu :pc] inc)
-        (update :flags merge {:cy (flag-cy result)}))))
+        (update :flags merge {:cy cy}))))
 
 (defn ldax [r-msb state]
   (let [r16 (get-r16 r-msb state)
@@ -712,7 +716,7 @@
                           (assoc :flags {:z (flag-z result)
                                          :s (flag-s result)
                                          :p (flag-p result)
-                                         :cy (flag-cy result)
+                                         :cy (flag-cy a m)
                                          :ac (flag-ac result)}))))
 
         0x87
@@ -828,7 +832,7 @@
                           (update-in [:cpu :pc] + 2)
                           (assoc :flags {:z (flag-z result)
                                          :s (flag-s result)
-                                         :cy (flag-cy result)
+                                         :cy (flag-cy a d8)
                                          :p (flag-p result)
                                          :pad 0}))))
 
