@@ -191,6 +191,23 @@
         (assoc-in [:flags :cy] cy)
         (update-in [:cpu :pc] inc))))
 
+(defn ral [state]
+  (let [a (-> state :cpu :a)
+        cy (-> state :flags :cy)
+        
+        cy' (-> a
+                (bit-and 2r10000000)
+                (bit-shift-right 7))
+        result (-> a
+                   (bit-shift-left 1)
+                   (bit-and 0xff)
+                   (+ cy))]
+    (when debug (println "RAL"))
+    (-> state
+        (assoc-in [:cpu :a] result)
+        (assoc-in [:flags :cy] cy')
+        (update-in [:cpu :pc] inc))))
+
 (defn dad [r-msb state]
   (let [r16 (get-r16 r-msb state)
         hl (get-r16 :h state)
@@ -320,6 +337,9 @@
 
         0x16
         #_=> (recur (mvi :d state))
+
+        0x17
+        #_=> (recur (ral state))
 
         ;; 0x18
         ;; #_=> nil
