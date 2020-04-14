@@ -194,7 +194,6 @@
 (defn ral [state]
   (let [a (-> state :cpu :a)
         cy (-> state :flags :cy)
-        
         cy' (-> a
                 (bit-and 2r10000000)
                 (bit-shift-right 7))
@@ -203,6 +202,20 @@
                    (bit-and 0xff)
                    (+ cy))]
     (when debug (println "RAL"))
+    (-> state
+        (assoc-in [:cpu :a] result)
+        (assoc-in [:flags :cy] cy')
+        (update-in [:cpu :pc] inc))))
+
+(defn rar [state]
+  (let [a (-> state :cpu :a)
+        cy (-> state :flags :cy)
+        cy' (bit-and a 1)
+        result (+ (bit-shift-left cy 7)
+                  (-> a
+                      (bit-shift-right 1)
+                      (bit-and 0xff)))]
+    (when debug (println "RAR"))
     (-> state
         (assoc-in [:cpu :a] result)
         (assoc-in [:flags :cy] cy')
@@ -362,8 +375,8 @@
         0x1e
         #_=> (recur (mvi :e state))
 
-        ;; 0x1f
-        ;; #_=> nil
+        0x1f
+        #_=> (recur (rar state))
 
         ;; 0x20
         ;; #_=> nil
