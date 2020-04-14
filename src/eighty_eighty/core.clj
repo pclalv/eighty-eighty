@@ -24,14 +24,20 @@
    :flags flags
    :interrupt-enabled true})
 
-(defn get-hl [state]
-  (let [{msb :h
-         lsb :l} (:cpu state)
-        hl (-> (+ (bit-shift-left msb 8)
-                  lsb)
-               (bit-and 0xffff))]
-    hl))
-  
+(defn get-r16
+  "Get a 16-bit register."
+  [r state]  
+  (let [[r-msb r-lsb] (case r
+                        :b [:b :c]
+                        :d [:d :e]
+                        :h [:h :l]
+                        (throw (Exception. (str "Unknown register: " (name r)))))
+        {msb r-msb
+         lsb r-lsb} (:cpu state)
+        r16 (-> (+ (bit-shift-left msb 8)
+                   lsb)
+                (bit-and 0xffff))]
+    r16))
 
 (defn flag-z [n]
   (if (= 0 (bit-and n 0xff))
@@ -111,7 +117,7 @@
 (defn stax [r-msb r-lsb state]
   (let [{a :a
          msb r-msb
-         lsb r-lsb} state
+         lsb r-lsb} (state :cpu)
         adr (bit-and 0xff
                      (+ (bit-shift-left msb 8)
                         lsb))]
@@ -334,7 +340,7 @@
                           (update-in [:cpu :pc] inc))))
 
         0x34
-        #_=> (let [hl (get-hl state)
+        #_=> (let [hl (get-r16 :h state)
                    v (-> state :memory (nth hl))
                    result (-> hl inc (bit-and 0xff))]
                (when debug (println "INR M"))
@@ -347,7 +353,7 @@
                                          :ac (flag-ac result)})))
 
         0x35
-        #_=> (let [hl (get-hl state)
+        #_=> (let [hl (get-r16 :h state)
                    v (-> state :memory (nth hl))
                    result (-> hl dec (bit-and 0xff))]
                (when debug (println "DCR M"))
@@ -360,7 +366,7 @@
                                          :ac (flag-ac result)})))
 
         0x36
-        #_=> (let [hl (get-hl state)
+        #_=> (let [hl (get-r16 :h state)
                    d8 (-> state :memory (nth (inc pc)))]
                (when debug (println "MVI" (str "M,"
                                                d8)))
@@ -574,7 +580,7 @@
 
         0x86
         #_=> (let [a (-> state :cpu :a)
-                   hl (get-hl state)
+                   hl (get-r16 :h state)
                    m (-> state :cpu (nth hl))
                    result (-> (+ a m)
                               (bit-and 0xff))]
