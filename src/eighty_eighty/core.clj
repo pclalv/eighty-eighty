@@ -164,6 +164,19 @@
   "FIXME: implement"
   [] nil)
 
+(defn dad [r-msb state]
+  (let [r16 (get-r16 r-msb state)
+        hl (get-r16 :h state)
+        result (bit-and (+ hl r16)
+                        0xffff)
+        h' (bit-shift-right result 8)
+        l' (bit-and result 0xff)]
+    (when debug (println "DAD" (-> r-msb name clojure.string/upper-case)))
+    (-> state
+        (assoc-in [:cpu :h] h')
+        (assoc-in [:cpu :l] l')
+        (update :flags merge {:cy (flag-cy result)}))))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -199,8 +212,8 @@
         ;; 0x07
         ;; #_=> nil
 
-        ;; 0x09
-        ;; #_=> nil
+        0x09
+        #_=> (recur (dad :b state))
 
         ;; 0x08
         ;; #_=> nil
@@ -247,8 +260,8 @@
         ;; 0x18
         ;; #_=> nil
 
-        ;; 0x19
-        ;; #_=> nil
+        0x19
+        #_=> (recur (dad :d state))
 
         ;; 0x1a
         ;; #_=> nil
@@ -295,8 +308,8 @@
         ;; 0x28
         ;; #_=> nil 
 
-        ;; 0x29
-        ;; #_=> nil
+        0x29
+        #_=> (recur (dad :h state))
 
         ;; 0x2a
         ;; #_=> nil
@@ -383,8 +396,15 @@
         ;; 0x38
         ;; #_=> nil
 
-        ;; 0x39
-        ;; #_=> nil
+        0x39
+        #_=> (recur (let [sp (-> state :cpu :sp)
+                          hl (get-r16 :h state)
+                          result (bit-and (+ hl sp)
+                                          0xffff)]
+                      (when debug (println "DAD SP"))
+                      (-> state
+                          (assoc-in [:cpu :sp] result)
+                          (update :flags merge {:cy (flag-cy result)}))))
 
         ;; 0x3a
         ;; #_=> nil
