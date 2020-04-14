@@ -239,6 +239,25 @@
         (update-in [:cpu :pc] inc)
         (update :flags merge {:cy cy}))))
 
+(defn dad-sp [state]
+  (let [sp (-> state :cpu :sp)
+        hl (get-r16 :h state)
+        result (bit-and (+ hl sp)
+                        0xffff)
+        h' (bit-shift-right result 8)
+        l' (bit-and result 0xff)
+        
+        ;; 16-bit carry; extract into fn?
+        cy (-> (+ hl sp)
+               (bit-and 0xffff0000)
+               (> 0))]
+    (when debug (println "DAD SP"))
+    (-> state
+        (assoc-in [:cpu :h] h')
+        (assoc-in [:cpu :l] l')
+        (update-in [:cpu :pc] inc)
+        (update :flags merge {:cy cy}))))
+
 (defn ldax [r-msb state]
   (let [r16 (get-r16 r-msb state)
         v (-> state :memory (nth r16))]
@@ -498,14 +517,7 @@
         ;; #_=> nil
 
         0x39
-        #_=> (recur (let [sp (-> state :cpu :sp)
-                          hl (get-r16 :h state)
-                          result (bit-and (+ hl sp)
-                                          0xffff)]
-                      (when debug (println "DAD SP"))
-                      (-> state
-                          (assoc-in [:cpu :sp] result)
-                          (update :flags merge {:cy (flag-cy result)}))))
+        #_=> (recur (dad-sp state))
 
         ;; 0x3a
         ;; #_=> nil
