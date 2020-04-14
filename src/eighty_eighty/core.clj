@@ -175,6 +175,7 @@
     (-> state
         (assoc-in [:cpu :h] h')
         (assoc-in [:cpu :l] l')
+        (update-in [:cpu :pc] inc)
         (update :flags merge {:cy (flag-cy result)}))))
 
 ;; TODO: continue implementing arithmetic operations
