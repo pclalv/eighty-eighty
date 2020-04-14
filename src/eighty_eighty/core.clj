@@ -115,11 +115,8 @@
         result (-> d16
                    inc
                    (bit-and 0xffff))
-        msb' (-> result
-                 (bit-shift-right 8)
-                 (bit-and 0xff))
-        lsb' (-> result
-                 (bit-and 0xff))]
+        msb' (bit-shift-right result 8)
+        lsb' (bit-and result 0xff)]
     (when debug (println "INX" r-msb))
     (-> state
         (update [:cpu] merge {r-msb msb'
