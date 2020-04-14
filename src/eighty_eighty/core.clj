@@ -159,7 +159,10 @@
     (-> state
         (assoc-in [:cpu r] d8)
         (update-in [:cpu :pc] + 2))))
-        
+
+(defn rlc
+  "FIXME: implement"
+  [] nil)
 
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
