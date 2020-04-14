@@ -157,10 +157,12 @@
         (assoc-in [:cpu r] d8)
         (update-in [:cpu :pc] + 2))))
 
+;;;;;;;;;;;;
+;; rotate ;;
+;;;;;;;;;;;;
+
 (defn rlc [state]
-  (let [a (-> state
-              :cpu
-              :a)
+  (let [a (-> state :cpu :a)
         cy (-> a
                (bit-and 2r10000000)
                (bit-shift-right 7))
