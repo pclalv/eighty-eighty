@@ -215,7 +215,7 @@
 
 (defn dcx [r-msb state]
   (let [r16 (get-r16 r-msb state)
-        r-lsb (case r
+        r-lsb (case r-msb
                 :b :c
                 :d :e
                 :h :l)
