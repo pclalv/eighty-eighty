@@ -178,6 +178,14 @@
         (update-in [:cpu :pc] inc)
         (update :flags merge {:cy (flag-cy result)}))))
 
+(defn ldax [r-msb state]
+  (let [r16 (get-r16 r-msb state)
+        v (-> state :memory (nth r16))]
+    (when debug (println "LDAX" (-> r-msb name clojure.string/upper-case)))
+    (-> state
+        (assoc-in [:cpu :a] v)
+        (update-in [:cpu :pc] inc))))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -215,6 +223,9 @@
 
         0x09
         #_=> (recur (dad :b state))
+
+        0x0a
+        #_=> (result (ldax :b state))
 
         ;; 0x08
         ;; #_=> nil
@@ -264,8 +275,8 @@
         0x19
         #_=> (recur (dad :d state))
 
-        ;; 0x1a
-        ;; #_=> nil
+        0x1a
+        #_=> (result (ldax :d state))
 
         ;; 0x1b
         ;; #_=> nil
