@@ -283,9 +283,6 @@
         0x0a
         #_=> (recur (ldax :b state))
 
-        ;; 0x08
-        ;; #_=> nil
-
         0x0b
         #_=> (recur (dcx :b state))
 
@@ -302,7 +299,7 @@
         #_=> (recur (rrc state))
 
         ;; 0x10
-        ;; #_=> nil
+        ;; deliberately undefined
 
         0x11
         #_=> (recur (lxi :d :e state))
