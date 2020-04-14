@@ -59,9 +59,24 @@
     1
     0))
 
+(def flag-p-bits
+  [2r10000000
+   2r01000000
+   2r00100000
+   2r00010000
+   2r00001000
+   2r00000100
+   2r00000010
+   2r00000001])
+
 (defn flag-p [n]
-  ;; FIXME
-  0)
+  (let [parity (apply + (map #(if (= 0 (bit-and n %))
+                                0
+                                1)
+                             flag-p-bits))]
+    (if (even? parity)
+      1
+      0)))
 
 (defn flag-ac [n]
   ;; FIXME

@@ -2,6 +2,16 @@
   (:require [clojure.test :refer :all]
             [eighty-eighty.core :refer :all]))
 
+(deftest flag-p-test
+  (testing "0 bits"
+    (is (= 1 (flag-p 2r00000000))))
+  (testing "3 bites"
+    (is (= 0 (flag-p 2r01010001))))
+  (testing "4 bits"
+    (is (= 1 (flag-p 2r01101001))))
+  (testing "7 bits"
+    (is (= 0 (flag-p 2r01111111)))))
+
 (deftest rlc-test
   (testing "once"
     (is (= {:flags {:cy 1}
