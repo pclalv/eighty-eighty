@@ -157,9 +157,22 @@
         (assoc-in [:cpu r] d8)
         (update-in [:cpu :pc] + 2))))
 
-(defn rlc
-  "FIXME: implement"
-  [] nil)
+(defn rlc [state]
+  (let [a (-> state
+              :cpu
+              :a)
+        cy (-> a
+               (bit-and 2r10000000)
+               (bit-shift-right 7))
+        result (+ (-> a
+                      (bit-shift-left 1)
+                      (bit-and 0xff))
+                  cy)]
+    (when debug (println "RLC"))
+    (-> state
+        (assoc-in [:cpu :a] result)
+        (assoc-in [:flags :cy] cy)
+        (update-in [:cpu :pc] inc))))
 
 (defn dad [r-msb state]
   (let [r16 (get-r16 r-msb state)
@@ -243,8 +256,8 @@
         0x06
         #_=> (recur (mvi :b state))
 
-        ;; 0x07
-        ;; #_=> nil
+        0x07
+        #_=> (recur (rlc state))
 
         ;; 0x08
         ;; deliberately undefined
