@@ -298,7 +298,7 @@
         #_=> (recur (dad :d state))
 
         0x1a
-        #_=> (result (ldax :d state))
+        #_=> (recur (ldax :d state))
 
         0x1b
         #_=> (recur (dcx :d state))
