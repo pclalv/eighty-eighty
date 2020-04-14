@@ -174,6 +174,21 @@
         (assoc-in [:flags :cy] cy)
         (update-in [:cpu :pc] inc))))
 
+(defn rrc [state]
+  (let [a (-> state
+              :cpu
+              :a)
+        cy (bit-and a 2r00000001)
+        result (+ (-> a
+                      (bit-shift-right 1)
+                      (bit-and 0xff))
+                  (bit-shift-left cy 7))]
+    (when debug (println "RRC"))
+    (-> state
+        (assoc-in [:cpu :a] result)
+        (assoc-in [:flags :cy] cy)
+        (update-in [:cpu :pc] inc))))
+
 (defn dad [r-msb state]
   (let [r16 (get-r16 r-msb state)
         hl (get-r16 :h state)
@@ -283,8 +298,8 @@
         0x0e
         #_=> (recur (mvi :c state))
 
-        ;; 0x0f
-        ;; #_=> nil
+        0x0f
+        #_=> (recur (rrc state))
 
         ;; 0x10
         ;; #_=> nil
