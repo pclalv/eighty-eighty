@@ -253,7 +253,7 @@
         #_=> (recur (dad :b state))
 
         0x0a
-        #_=> (result (ldax :b state))
+        #_=> (recur (ldax :b state))
 
         ;; 0x08
         ;; #_=> nil
