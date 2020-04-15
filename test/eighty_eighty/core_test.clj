@@ -12,6 +12,11 @@
   (testing "7 bits"
     (is (= 0 (flag-p 2r01111111)))))
 
+(deftest flag-ac-test
+  (testing "return value"
+    (is (= 1 (flag-ac 0x2B 0x39)))
+    (is (= 1 (flag-ac 0x3e 0x22)))))
+
 (deftest rlc-test
   (testing "once"
     (is (= {:flags {:cy 1}

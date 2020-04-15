@@ -54,11 +54,6 @@
     1
     0))
 
-(defn flag-cy [a0 a1]
-  (if (> (+ a0 a1) 0xff)
-    1
-    0))
-
 (def flag-p-bits
   [2r10000000
    2r01000000
@@ -78,9 +73,19 @@
       1
       0)))
 
-(defn flag-ac [n]
-  ;; FIXME
-  0)
+(defn flag-cy [a0 a1]
+  ;; TODO: does this only work for addition?
+  (if (> (+ a0 a1) 0xff)
+    1
+    0))
+
+(defn flag-ac [a0 a1]
+  ;; TODO: does this only work for addition?  
+  (let [a0-nybble (bit-and a0 2r00001111)
+        a1-nybble (bit-and a1 2r00001111)]
+    (if (>= (+ a0-nybble a1-nybble) 2r00010000)
+      1
+      0)))
 
 (defn add [r state]
   (let [{a :a
@@ -98,8 +103,8 @@
         (update :flags merge {:z (flag-z result)
                               :s (flag-s result)
                               :p (flag-p result)
-                              :ac (flag-ac result)}))))
                               :cy (flag-cy a v)
+                              :ac (flag-ac a v)}))))
 
 ;; (lxi :b :c state) will load byte 3 into b and byte 2 into c
 (defn lxi [r-msb r-lsb state]
@@ -153,7 +158,7 @@
         (update :flags merge {:z (flag-z result)
                               :s (flag-s result)
                               :p (flag-p result)
-                              :ac (flag-ac result)}))))                 
+                              :ac (flag-ac v 1)}))))                 
 
 (defn dcr [r state]
   (let [v (-> state :cpu r)
@@ -165,7 +170,7 @@
         (update :flags merge {:z (flag-z result)
                               :s (flag-s result)
                               :p (flag-p result)
-                              :ac (flag-ac result)}))))
+                              :ac (flag-ac v -1)}))))
 
 (defn mvi [r state]
   (let [pc (-> state :cpu :pc)
