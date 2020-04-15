@@ -75,9 +75,11 @@
 
 (defn flag-cy [a0 a1]
   ;; TODO: does this only work for addition?
-  (if (> (+ a0 a1) 0xff)
-    1
-    0))
+  (let [sum (+ (bit-and a0 0xff)
+               (bit-and a1 0xff))]
+    (if (> sum 0xff)
+      1
+      0)))
 
 (defn flag-ac [a0 a1]
   ;; TODO: does this only work for addition?  
