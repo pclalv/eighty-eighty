@@ -24,6 +24,11 @@
    :flags flags
    :interrupt-enabled true})
 
+(defn byte-str-with-padding
+  "prints a string like 01010101"
+  [i]
+  (clojure.pprint/cl-format nil "~8'0b" i))
+
 (defn get-r16
   "Get a 16-bit register."
   [r state]  
@@ -293,7 +298,9 @@
         (assoc-in [:cpu :a] v)
         (update-in [:cpu :pc] inc))))
 
-(defn dcx [r-msb state]
+(defmulti dcx (fn [r _state] r))
+(defmethod dcx :default
+  [r-msb state]
   (let [r16 (get-r16 r-msb state)
         r-lsb (case r-msb
                 :b :c
@@ -310,7 +317,8 @@
         (assoc-in [:cpu r-lsb] r-lsb')
         (update-in [:cpu :pc] inc))))
 
-(defn dcx-sp [state]
+(defmethod dcx :sp
+  [_ state]
   (let [result (-> state
                    :cpu
                    :sp
@@ -550,7 +558,7 @@
         ;; #_=> nil
 
         0x3b
-        #_=> (recur (dcx-sp state))
+        #_=> (recur (dcx :sp state))
 
         0x3c
         #_=> (recur (inr :a state))
