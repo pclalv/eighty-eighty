@@ -2,6 +2,11 @@
 
 clojure implementation of http://www.emulator101.com/
 
+## To do
+
+eventually test it with this or perhaps with something mmore suited to
+testing/diagnostics? https://github.com/superzazu/8080
+
 ## Installation
 
 FIXME
