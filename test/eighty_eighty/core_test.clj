@@ -2,6 +2,9 @@
   (:require [clojure.test :refer :all]
             [eighty-eighty.core :refer :all]))
 
+;; TODO: test more opcode fns. this site seems to have good examples:
+;; https://www.geeksforgeeks.org/rotate-instructions-in-8085/
+
 (deftest flag-p-test
   (testing "0 bits"
     (is (= 1 (flag-p 2r00000000))))
