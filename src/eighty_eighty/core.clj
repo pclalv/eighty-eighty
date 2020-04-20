@@ -94,7 +94,26 @@
       1
       0)))
 
-(defn add [r state]
+(defmulti add (fn [r _state] r))
+(defmethod add :m
+  [_ state]
+  (let [a (-> state :cpu :a)
+        hl (get-r16 :h state)
+        m (-> state :cpu (nth hl))
+        result (-> (+ a m)
+                   (bit-and 0xff))]
+    (when debug (println "ADD M"))
+    (-> state
+        (assoc-in [:cpu :a] result)
+        (update-in [:cpu :pc] inc)
+        (assoc :flags {:z (flag-z result)
+                       :s (flag-s result)
+                       :p (flag-p result)
+                       :cy (flag-cy a m)
+                       :ac (flag-ac result)}))))
+
+(defmethod add :default
+  [r state]
   (let [{a :a
          v r} (:cpu state)
         ;; "I am emulating the 8-bit math instructions by using a
@@ -191,7 +210,23 @@
                               r-lsb lsb'})
         (update-in [:cpu :pc] inc))))
 
-(defn inr [r state]
+(defmulti inr (fn [r _state] r))
+(defmethod inr :m
+  [_ state]
+  (let [hl (get-r16 :h state)
+        v (-> state :memory (nth hl))
+        result (-> hl inc (bit-and 0xff))]
+    (when debug (println "INR M"))
+    (-> state
+        (assoc-in [:memory hl] result)
+        (update-in [:cpu :pc] inc)
+        (update :flags merge {:z (flag-z result)
+                              :s (flag-s result)
+                              :p (flag-p result)
+                              :ac (flag-ac result)}))))
+
+(defmethod inr :default
+  [r state]
   (let [v (-> state :cpu r)
         result (-> v inc (bit-and 0xff))]
     (when debug (println "INR" (-> r name clojure.string/upper-case)))
@@ -203,7 +238,24 @@
                               :p (flag-p result)
                               :ac (flag-ac v 1)}))))                 
 
-(defn dcr [r state]
+(defmulti dcr (fn [r _state] r))
+
+(defmethod dcr :m
+  [_ state]
+  (let [hl (get-r16 :h state)
+        v (-> state :memory (nth hl))
+        result (-> hl dec (bit-and 0xff))]
+    (when debug (println "DCR M"))
+    (-> state
+        (assoc-in [:memory hl] result)
+        (update-in [:cpu :pc] inc)
+        (update :flags merge {:z (flag-z result)
+                              :s (flag-s result)
+                              :p (flag-p result)
+                              :ac (flag-ac result)}))))
+  
+(defmethod dcr :default
+  [r state]
   (let [v (-> state :cpu r)
         result (-> v dec (bit-and 0xff))]
     (when debug (println "DCR" (-> r name clojure.string/upper-case)))
@@ -215,7 +267,20 @@
                               :p (flag-p result)
                               :ac (flag-ac v -1)}))))
 
-(defn mvi [r state]
+(defmulti mvi (fn [r _state] r))
+(defmethod mvi :m
+  [_ state]
+  (let [hl (get-r16 :h state)
+        pc (-> state :cpu :pc)
+        d8 (-> state :memory (nth (inc pc)))]
+    (when debug (println "MVI" (str "M,"
+                                    d8)))
+    (-> state
+        (assoc-in [:memory hl] d8)
+        (update-in [:cpu :pc] + 2))))
+
+(defmethod mvi :default
+  [r state]
   (let [pc (-> state :cpu :pc)
         d8 (-> state :memory (nth (inc pc)))]
     (when debug (println "MVI" (str (-> r name clojure.string/upper-case)
@@ -576,39 +641,13 @@
         #_=> (recur (inx :sp state))
 
         0x34
-        #_=> (let [hl (get-r16 :h state)
-                   v (-> state :memory (nth hl))
-                   result (-> hl inc (bit-and 0xff))]
-               (when debug (println "INR M"))
-               (-> state
-                   (assoc-in [:memory hl] result)
-                   (update-in [:cpu :pc] inc)
-                   (update :flags merge {:z (flag-z result)
-                                         :s (flag-s result)
-                                         :p (flag-p result)
-                                         :ac (flag-ac result)})))
+        #_=> (recur (inr :m state))
 
         0x35
-        #_=> (let [hl (get-r16 :h state)
-                   v (-> state :memory (nth hl))
-                   result (-> hl dec (bit-and 0xff))]
-               (when debug (println "DCR M"))
-               (-> state
-                   (assoc-in [:memory hl] result)
-                   (update-in [:cpu :pc] inc)
-                   (update :flags merge {:z (flag-z result)
-                                         :s (flag-s result)
-                                         :p (flag-p result)
-                                         :ac (flag-ac result)})))
+        #_=> (recur (dcr :m state))
 
         0x36
-        #_=> (let [hl (get-r16 :h state)
-                   d8 (-> state :memory (nth (inc pc)))]
-               (when debug (println "MVI" (str "M,"
-                                               d8)))
-               (-> state
-                   (assoc-in [:memory hl] d8)
-                   (update-in [:cpu :pc] + 2)))
+        #_=> (recur (mvi :m state))
 
         ;; 0x37
         ;; #_=> nil
@@ -816,20 +855,7 @@
         #_=> (recur (add :l state))
 
         0x86
-        #_=> (let [a (-> state :cpu :a)
-                   hl (get-r16 :h state)
-                   m (-> state :cpu (nth hl))
-                   result (-> (+ a m)
-                              (bit-and 0xff))]
-               (when debug (println "ADD M"))
-               (recur (-> state
-                          (assoc-in [:cpu :a] result)
-                          (update-in [:cpu :pc] inc)
-                          (assoc :flags {:z (flag-z result)
-                                         :s (flag-s result)
-                                         :p (flag-p result)
-                                         :cy (flag-cy a m)
-                                         :ac (flag-ac result)}))))
+        #_=> (recur (add :m state))
 
         0x87
         #_=> (recur (add :a state))
