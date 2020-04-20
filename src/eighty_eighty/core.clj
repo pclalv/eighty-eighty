@@ -159,7 +159,9 @@
         msb (nth memory (+ 2 pc))
         d16 (+ (bit-shift-left msb 8)
                lsb)]
-    (when debug (println (str "LXI " (clojure.string/upper-case (str r-msb))) "," (format "#$%x" d16)))
+    (when debug (println "LXI" (str (-> r-msb name clojure.string/upper-case)
+                                    ","
+                                    (format "#$%x" d16)))) 
     (-> state
         (assoc-in [:cpu r-msb] msb)
         (assoc-in [:cpu r-lsb] lsb)
