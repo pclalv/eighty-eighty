@@ -158,8 +158,25 @@
         (assoc-in [:cpu :memory adr] a)
         (update-in [:cpu :pc] inc))))
 
-(defn inx [r-msb r-lsb state]
-  (let [{msb r-msb
+(defmulti inx (fn [r-msb _state] r-msb))
+(defmethod inx :sp
+  [_ state]
+  (let [sp (:sp cpu)
+        result (-> sp
+                   inc
+                   (bit-and 0xffff))]
+    (println "INX SP")
+    (-> state
+        (assoc [:cpu :sp] sp)
+        (update-in [:cpu :pc] inc))))
+
+(defmethod inx :default
+  [r-msb state]
+  (let [r-lsb (case r-msb
+                :b :c
+                :d :e
+                :h :l)
+        {msb r-msb
          lsb r-lsb} cpu
         d16 (+ (bit-shift-left msb 8)
                lsb)
@@ -412,7 +429,7 @@
         #_=> (recur (stax :b :c state))
 
         0x03
-        #_=> (recur (inx :b :c state))
+        #_=> (recur (inx :b state))
 
         0x04
         #_=> (recur (inr :b state))
@@ -460,7 +477,7 @@
         #_=> (recur (stax :d :e state))
 
         0x13
-        #_=> (recur (inx :d :e state))
+        #_=> (recur (inx :d state))
 
         0x14
         #_=> (recur (inr :d state))
@@ -508,7 +525,7 @@
         #_=> (recur (shld state))
 
         0x23
-        #_=> (recur (inx :h :l state))
+        #_=> (recur (inx :h state))
 
         0x24
         #_=> (recur (inr :h state))
@@ -556,14 +573,7 @@
         ;; #_=> nil
 
         0x33
-        #_=> (let [sp (:sp cpu)
-                   result (-> sp
-                              inc
-                              (bit-and 0xffff))]                   
-               (println "INX SP")
-               (recur (-> state
-                          (assoc [:cpu :sp] sp)
-                          (update-in [:cpu :pc] inc))))
+        #_=> (recur (inx :sp state))
 
         0x34
         #_=> (let [hl (get-r16 :h state)
