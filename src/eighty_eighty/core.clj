@@ -114,8 +114,27 @@
                               :ac (flag-ac a v)}))))
 
 ;; (lxi :b :c state) will load byte 3 into b and byte 2 into c
-(defn lxi [r-msb r-lsb state]
+(defmulti lxi (fn [r _state] r))
+(defmethod lxi :sp
+  [_ state]
+  (let [memory (:memory state)
+        pc (-> state :cpu :pc)
+        lsb (nth memory (+ 1 pc))
+        msb (nth memory (+ 2 pc))
+        d16 (+ (bit-shift-left msb 8)
+               lsb)]
+    (when debug (println "LXI SP," (format "#$%x" d16)))
+    (-> state
+        (assoc-in [:cpu :sp] (bit-and d16 0xffff))
+        (update-in [:cpu :pc] + 3))))
+
+(defmethod lxi :default
+  [r-msb state]
   (let [pc (-> state :cpu :pc)
+        r-lsb (case r-msb
+                :b :c
+                :d :e
+                :h :l)
         memory (:memory state)
         lsb (nth memory (+ 1 pc))
         msb (nth memory (+ 2 pc))
@@ -387,7 +406,7 @@
         #_=> (recur state)
 
         0x01
-        #_=> (recur (lxi :b :c state))
+        #_=> (recur (lxi :b state))
 
         0x02
         #_=> (recur (stax :b :c state))
@@ -435,7 +454,7 @@
         ;; deliberately undefined
 
         0x11
-        #_=> (recur (lxi :d :e state))
+        #_=> (recur (lxi :d state))
 
         0x12
         #_=> (recur (stax :d :e state))
@@ -483,7 +502,7 @@
         #_=> (recur state)
 
         0x21
-        #_=> (recur (lxi :h :l state))
+        #_=> (recur (lxi :h state))
 
         0x22
         #_=> (recur (shld state))
@@ -531,14 +550,7 @@
         ;; #_=> nil
 
         0x31
-        #_=> (let [lsb (nth memory (+ 1 pc))
-                   msb (nth memory (+ 2 pc))
-                   d16 (+ (bit-shift-left msb 8)
-                          lsb)]
-               (when debug (println "LXI SP," (format "#$%x" d16)))
-               (recur (-> state
-                          (assoc-in [:cpu :sp] (bit-and d16 0xffff))
-                          (update-in [:cpu :pc] + 3))))
+        #_=> (recur (lxi :sp state))
 
         ;; 0x32
         ;; #_=> nil
