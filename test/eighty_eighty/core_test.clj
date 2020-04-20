@@ -100,3 +100,15 @@
                       :pc 0}}
                rar
                rar)))))
+
+(deftest daa-test
+  ;; example taken from pg. 16 of the 8080 Programmer's Manual
+  (testing "return value"
+    (is (= {:cpu {:a 1
+                  :pc 1}
+            :flags {:ac 1
+                    :cy 1}}
+           (daa {:cpu {:a 0x9b
+                       :pc 0}
+                 :flags {:ac 0
+                         :cy 0}})))))

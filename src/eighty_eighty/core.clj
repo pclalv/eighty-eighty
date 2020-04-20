@@ -337,6 +337,41 @@
         (assoc-in [:cpu :h] (nth memory (-> pc inc inc)))
         (update-in [:cpu :pc] + 3))))
 
+(defn daa-0 [state]
+  (let [a (-> state :cpu :a)
+        ac (-> state :flags :ac)
+        low-nybble (bit-and a 2r00001111)
+        increment (if (or (> low-nybble 9)
+                          (= ac 1))
+                    6
+                    0)
+        a' (+ a increment)]
+    (-> state
+        (assoc-in [:cpu :a] (bit-and a' 0xff))
+        (assoc-in [:flags :ac] (flag-ac low-nybble increment)))))
+
+(defn daa-1 [state]
+  (let [a (-> state :cpu :a)
+        cy (-> state :flags :cy)
+        low-nybble (bit-and a 2r00001111)
+        high-nybble (bit-and a 2r11110000)
+        increment (if (or (> high-nybble 9)
+                          (= cy 1))
+                    (bit-shift-left 6 4)
+                    0)
+        high-nybble' (+ high-nybble increment)
+        a' (+ (bit-and high-nybble' 2r11110000)
+              low-nybble)]
+    (-> state
+        (assoc-in [:cpu :a] a')
+        (assoc-in [:flags :cy] (flag-cy high-nybble increment)))))
+      
+(defn daa [state]
+  (-> state
+      daa-0
+      daa-1
+      (update-in [:cpu :pc] inc)))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -465,11 +500,11 @@
         0x26
         #_=> (recur (mvi :h state))
 
-        ;; 0x27
-        ;; #_=> nil
+        0x27
+        #_=> (recur (daa state))
 
-        ;; 0x28
-        ;; #_=> nil 
+        0x28
+        #_=> (recur state)
 
         0x29
         #_=> (recur (dad :h state))
