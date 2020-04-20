@@ -132,7 +132,6 @@
                               :cy (flag-cy a v)
                               :ac (flag-ac a v)}))))
 
-;; (lxi :b :c state) will load byte 3 into b and byte 2 into c
 (defmulti lxi (fn [r _state] r))
 (defmethod lxi :sp
   [_ state]
