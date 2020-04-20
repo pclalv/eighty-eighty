@@ -329,6 +329,14 @@
         (assoc-in [:cpu :sp] result)
         (update-in [:cpu :pc] inc))))
 
+(defn shld [state]
+  (let [pc (-> state :cpu :pc)
+        memory (:memory state)]
+    (-> state
+        (assoc-in [:cpu :l] (nth memory (-> pc inc)))
+        (assoc-in [:cpu :h] (nth memory (-> pc inc inc)))
+        (update-in [:cpu :pc] + 3))))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -436,14 +444,14 @@
         0x1f
         #_=> (recur (rar state))
 
-        ;; 0x20
-        ;; #_=> nil
+        0x20
+        #_=> (recur state)
 
         0x21
         #_=> (recur (lxi :h :l state))
 
-        ;; 0x22
-        ;; #_=> nil
+        0x22
+        #_=> (recur (shld state))
 
         0x23
         #_=> (recur (inx :h :l state))
