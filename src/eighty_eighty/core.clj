@@ -166,16 +166,12 @@
         (assoc-in [:cpu r-lsb] lsb)
         (update-in [:cpu :pc] + 3))))
 
-(defn stax [r-msb r-lsb state]
-  (let [{a :a
-         msb r-msb
-         lsb r-lsb} (state :cpu)
-        adr (bit-and 0xff
-                     (+ (bit-shift-left msb 8)
-                        lsb))]
+(defn stax [r-msb state]
+  (let [a (-> state :cpu :a)
+        adr (get-r16 r-msb state)]
     (when debug (println "STAX" (name r-msb)))
     (-> state
-        (assoc-in [:cpu :memory adr] a)
+        (assoc-in [:memory adr] a)
         (update-in [:cpu :pc] inc))))
 
 (defmulti inx (fn [r-msb _state] r-msb))
@@ -558,7 +554,7 @@
         #_=> (recur (lxi :b state))
 
         0x02
-        #_=> (recur (stax :b :c state))
+        #_=> (recur (stax :b state))
 
         0x03
         #_=> (recur (inx :b state))
@@ -606,7 +602,7 @@
         #_=> (recur (lxi :d state))
 
         0x12
-        #_=> (recur (stax :d :e state))
+        #_=> (recur (stax :d state))
 
         0x13
         #_=> (recur (inx :d state))

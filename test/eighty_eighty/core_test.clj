@@ -180,3 +180,16 @@
             :a 0x04}
            (:cpu (lda {:cpu {:pc 0}
                        :memory [0x3a 0x03 0x00 0x04]}))))))
+
+(deftest stax-test
+  (testing "return value"
+    (is (= {:cpu {:a 0x69
+                  :b 0x00
+                  :c 0x01
+                  :pc 1}
+            :memory [0x02 0x69]}
+           (stax :b {:cpu {:a 0x69
+                           :b 0x00
+                           :c 0x01
+                           :pc 0}
+                     :memory [0x02 0x00]})))))
