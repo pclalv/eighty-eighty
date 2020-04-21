@@ -491,6 +491,13 @@
         (assoc-in [:cpu :h] (nth memory (inc adr)))
         (update-in [:cpu :pc] + 3))))
 
+(defn cma [state]
+  (let [a' (-> state :cpu :a bit-not (bit-and 0xff))]
+    (when debug (println "CMA"))
+    (-> state
+        (assoc-in [:cpu :a] a')
+        (update-in [:cpu :pc] inc))))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -643,8 +650,8 @@
         0x2e
         #_=> (recur (mvi :l state))
 
-        ;; 0x2f
-        ;; #_=> nil
+        0x2f
+        #_=> (recur (cma state))
 
         ;; 0x30
         ;; #_=> nil

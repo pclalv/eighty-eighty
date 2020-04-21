@@ -129,7 +129,7 @@
                   :cpu)))))
 
 (deftest daa-test
-  ;; example taken from pg. 16 of the 8080 Programmer's Manual
+  ;; taken from pg. 16 of the 8080 Programmer's Manual
   (testing "return value"
     (is (= {:cpu {:a 1
                   :pc 1}
@@ -139,3 +139,11 @@
                        :pc 0}
                  :flags {:ac 0
                          :cy 0}})))))
+
+(deftest cma-test
+  ;; taken from pg. 15 of the 8080 Programmer's Manual
+  (testing "return value"
+    (is (= {:cpu {:a 2r10101110
+                  :pc 1}}
+           (cma {:cpu {:a 2r01010001
+                       :pc 0}})))))
