@@ -147,3 +147,20 @@
                   :pc 1}}
            (cma {:cpu {:a 2r01010001
                        :pc 0}})))))
+
+(deftest stc-test
+  (testing "return value"
+    (is (= {:cpu {:pc 1}, :flags {:cy 1}}
+           (stc {:cpu {:pc 0}
+                 :flags {:cy 0}})))))
+
+(deftest cmc-test
+  (testing "return value"
+    (is (= {:cpu {:pc 1}
+            :flags {:cy 0}}
+           (cmc {:cpu {:pc 0}
+                 :flags {:cy 1}})))
+    (is (= {:cpu {:pc 1}
+            :flags {:cy 1}}
+           (cmc {:cpu {:pc 0}
+                 :flags {:cy 0}})))))

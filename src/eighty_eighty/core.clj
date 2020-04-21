@@ -498,6 +498,23 @@
         (assoc-in [:cpu :a] a')
         (update-in [:cpu :pc] inc))))
 
+(defn stc [state]
+  (let []
+    (when debug (println "STC"))
+    (-> state
+        (assoc-in [:flags :cy] 1)
+        (update-in [:cpu :pc] inc))))
+
+(defn cmc [state]
+  (let [cy (-> state :flags :cy)
+        cy' (if (= 0 cy)
+              1
+              0)]
+    (when debug (println "CMC"))
+    (-> state
+        (assoc-in [:flags :cy] cy')
+        (update-in [:cpu :pc] inc))))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -629,8 +646,8 @@
         0x27
         #_=> (recur (daa state))
 
-        0x28
-        #_=> (recur state)
+        ;; 0x28
+        ;; deliberately undefined
 
         0x29
         #_=> (recur (dad :h state))
@@ -654,7 +671,7 @@
         #_=> (recur (cma state))
 
         ;; 0x30
-        ;; #_=> nil
+        ;; deliberately undefined
 
         0x31
         #_=> (recur (lxi :sp state))
@@ -674,11 +691,11 @@
         0x36
         #_=> (recur (mvi :m state))
 
-        ;; 0x37
-        ;; #_=> nil
+        0x37
+        #_=> (recur (stc state))
 
         ;; 0x38
-        ;; #_=> nil
+        ;; deliberately undefined
 
         0x39
         #_=> (recur (dad-sp state))
@@ -698,8 +715,8 @@
         0x3e
         #_=> (recur (mvi :a state))
 
-        ;; 0x3f
-        ;; #_=> nil
+        0x3f
+        #_=> (recur (cmc state))
 
         ;; 0x40
         ;; #_=> nil
