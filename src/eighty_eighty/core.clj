@@ -478,6 +478,19 @@
       daa-1
       (update-in [:cpu :pc] inc)))
 
+(defn lhld [state]
+  (let [{:keys [h l pc]} (-> state :cpu)
+        memory (:memory state)
+        adr-lsb (-> state :memory (nth (-> pc inc)))
+        adr-msb (-> state :memory (nth (-> pc inc inc)))
+        adr (+ (bit-shift-left adr-msb 8)
+               adr-lsb)]
+    (when debug (println "LHLD"  (format "%04x" adr)))
+    (-> state
+        (assoc-in [:cpu :l] (nth memory adr))
+        (assoc-in [:cpu :h] (nth memory (inc adr)))
+        (update-in [:cpu :pc] + 3))))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -615,8 +628,8 @@
         0x29
         #_=> (recur (dad :h state))
 
-        ;; 0x2a
-        ;; #_=> nil
+        0x2a
+        #_=> (recur (lhld state))
 
         0x2b
         #_=> (recur (dcx :h state))

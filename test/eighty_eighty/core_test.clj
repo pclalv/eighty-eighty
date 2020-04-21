@@ -114,6 +114,20 @@
                 :memory
                 (drop 0x0109))))))
 
+(deftest lhld-test
+  ;; taken from pg 31 of the 8080 Programmer's Manual
+  (testing "return value"
+      (is (= {:h 3, :l 255, :pc 3}
+             (->> (lhld {:cpu {:h 0xae
+                               :l 0x29
+                               :pc 0}
+                         :memory (-> [0x2a 0x5b 0x02]
+                                     (concat (-> 0x025b (repeat 0)))
+                                     vec
+                                     (assoc 0x025b 0xff)
+                                     (assoc 0x025c 0x03))})
+                  :cpu)))))
+
 (deftest daa-test
   ;; example taken from pg. 16 of the 8080 Programmer's Manual
   (testing "return value"
