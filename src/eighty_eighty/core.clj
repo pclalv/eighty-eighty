@@ -515,6 +515,19 @@
         (assoc-in [:flags :cy] cy')
         (update-in [:cpu :pc] inc))))
 
+(defn lda [state]
+  (let [pc (-> state :cpu :pc)
+        memory (:memory state)
+        adr-lsb (-> state :memory (nth (-> pc inc)))
+        adr-msb (-> state :memory (nth (-> pc inc inc)))
+        adr (+ (bit-shift-left adr-msb 8)
+               adr-lsb)
+        a' (nth memory adr)]
+    (when debug (println "LDA" (format "%04x" adr)))
+    (-> state
+        (assoc-in [:cpu :a] a')
+        (update-in [:cpu :pc] + 3))))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -700,8 +713,8 @@
         0x39
         #_=> (recur (dad-sp state))
 
-        ;; 0x3a
-        ;; #_=> nil
+        0x3a
+        #_=> (recur (lda state))
 
         0x3b
         #_=> (recur (dcx :sp state))

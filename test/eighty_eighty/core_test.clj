@@ -164,3 +164,10 @@
             :flags {:cy 1}}
            (cmc {:cpu {:pc 0}
                  :flags {:cy 0}})))))
+
+(deftest lda-test
+  (testing "return value"
+    (is (= {:pc 3
+            :a 0x04}
+           (:cpu (lda {:cpu {:pc 0}
+                       :memory [0x3a 0x03 0x00 0x04]}))))))
