@@ -165,6 +165,15 @@
            (cmc {:cpu {:pc 0}
                  :flags {:cy 0}})))))
 
+(deftest sta-test
+  (testing "return value"
+    (is (= {:cpu {:a 0x69
+                  :pc 3}
+            :memory [0x32 0x03 0x00 0x69]}
+           (sta {:cpu {:a 0x69
+                       :pc 0}
+                 :memory [0x32 0x03 0x00 0x00]})))))
+
 (deftest lda-test
   (testing "return value"
     (is (= {:pc 3

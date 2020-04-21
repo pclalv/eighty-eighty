@@ -515,6 +515,18 @@
         (assoc-in [:flags :cy] cy')
         (update-in [:cpu :pc] inc))))
 
+(defn sta [state]
+  (let [pc (-> state :cpu :pc)
+        memory (:memory state)
+        adr-lsb (-> state :memory (nth (-> pc inc)))
+        adr-msb (-> state :memory (nth (-> pc inc inc)))
+        adr (+ (bit-shift-left adr-msb 8)
+               adr-lsb)]
+    (when debug (println "STA" (format "%04x" adr)))
+    (-> state
+        (assoc-in [:memory adr] (-> state :cpu :a))
+        (update-in [:cpu :pc] + 3))))
+
 (defn lda [state]
   (let [pc (-> state :cpu :pc)
         memory (:memory state)
@@ -689,8 +701,8 @@
         0x31
         #_=> (recur (lxi :sp state))
 
-        ;; 0x32
-        ;; #_=> nil
+        0x32
+        #_=> (recur (sta state))
 
         0x33
         #_=> (recur (inx :sp state))
