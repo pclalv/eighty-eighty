@@ -536,6 +536,42 @@
         (assoc-in [:cpu :a] a')
         (update-in [:cpu :pc] + 3))))
 
+(defmulti mov (fn [r-dst r-src _state]
+                (cond (= r-dst :m)
+                      #_=> :to-m
+
+                      (= r-src :m)
+                      #_=> :from-m)))
+
+(defmethod mov :to-m
+  [_ r-src state]
+  (let [adr (get-r16 :h state)]
+    (when debug (println (str "MOV M," (-> r-src name clojure.string/upper-case))))
+    (-> state
+        (assoc-in [:memory adr] (-> state :cpu r-src))
+        (update-in [:cpu :pc] inc))))
+
+(defmethod mov :from-m
+  [r-dst _ state]
+  (let [adr (get-r16 :h state)]
+    (when debug (println (str "MOV "
+                              (-> r-dst name clojure.string/upper-case)
+                              ",M")))
+    (-> state
+        (assoc-in [:cpu r-dst] (-> state :memory (nth adr)))
+        (update-in [:cpu :pc] inc))))
+
+(defmethod mov :default
+  [r-dst r-src state]
+  (let []
+    (when debug (println (str "MOV "
+                              (-> r-dst name clojure.string/upper-case)
+                              ","
+                              (-> r-src name clojure.string/upper-case))))
+    (-> state
+        (assoc-in [:cpu r-dst] (-> state :cpu r-src))
+        (update-in [:cpu :pc] inc))))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -739,165 +775,198 @@
         0x3f
         #_=> (recur (cmc state))
 
-        ;; 0x40
-        ;; #_=> nil
+        0x40
+        ;; MOV B,B
+        #_=> (recur state)
 
-        ;; 0x41
-        ;; #_=> nil
+        0x41
+        #_=> (recur (mov :b :c state))
 
-        ;; 0x42
-        ;; #_=> nil
+        0x42
+        #_=> (recur (mov :b :d state))
 
-        ;; 0x43
-        ;; #_=> nil
+        0x43
+        #_=> (recur (mov :b :e state))
 
-        ;; 0x44
-        ;; #_=> nil
+        0x44
+        #_=> (recur (mov :b :h state))
 
-        ;; 0x45
-        ;; #_=> nil
+        0x45
+        #_=> (recur (mov :b :l state))
 
-        ;; 0x46
-        ;; #_=> nil
+        0x46
+        #_=> (recur (mov :b :m state))
 
-        ;; 0x47
-        ;; #_=> nil
+        0x47
+        #_=> (recur (mov :b :a state))
 
-        ;; 0x48
-        ;; #_=> nil
+        0x48
+        #_=> (recur (mov :c :b state))
 
-        ;; 0x49
-        ;; #_=> nil
+        0x49
+        #_=> (recur state)
 
-        ;; 0x4a
-        ;; #_=> nil
+        0x4a
+        #_=> (recur (mov :c :d state))
 
-        ;; 0x4b
-        ;; #_=> nil
+        0x4b
+        #_=> (recur (mov :c :e state))
 
-        ;; 0x4c
-        ;; #_=> nil
+        0x4c
+        #_=> (recur (mov :c :h state))
 
-        ;; 0x4d
-        ;; #_=> nil
+        0x4d
+        #_=> (recur (mov :c :l state))
 
-        ;; 0x4e
-        ;; #_=> nil
+        0x4e
+        #_=> (recur (mov :c :m state))
 
-        ;; 0x4f
-        ;; #_=> nil
+        0x4f
+        #_=> (recur (mov :c :a state))
 
-        ;; 0x50
-        ;; #_=> nil
+        0x50
+        #_=> (recur (mov :d :b state))
 
-        ;; 0x51
-        ;; #_=> nil
+        0x51
+        #_=> (recur (mov :d :c state))
 
-        ;; 0x54
-        ;; #_=> nil
+        0x52
+        #_=> (recur state)
 
-        ;; 0x56
-        ;; #_=> nil
+        0x53
+        #_=> (recur (mov :d :e state))
 
-        ;; 0x57
-        ;; #_=> nil
+        0x54
+        #_=> (recur (mov :d :h state))
 
-        ;; 0x59
-        ;; #_=> nil
+        0x55
+        #_=> (recur (mov :d :l state))
 
-        ;; 0x5b
-        ;; #_=> nil
+        0x56
+        #_=> (recur (mov :d :m state))
 
-        ;; 0x5e
-        ;; #_=> nil
+        0x57
+        #_=> (recur (mov :d :a state))
 
-        ;; 0x5f nil
+        0x58
+        #_=> (recur (mov :e :b state))
 
-        ;; 0x60
-        ;; #_=> nil
+        0x59
+        #_=> (recur (mov :e :c state))
 
-        ;; 0x61
-        ;; #_=> nil
+        0x5a
+        #_=> (recur (mov :e :d state))
 
-        ;; 0x62
-        ;; #_=> nil
+        0x5b
+        #_=> (recur state)
 
-        ;; 0x63
-        ;; #_=> nil
+        0x5c
+        #_=> (recur (mov :e :h state))
 
-        ;; 0x64
-        ;; #_=> nil
+        0x5d
+        #_=> (recur (mov :e :l state))
 
-        ;; 0x65
-        ;; #_=> nil
+        0x5e
+        #_=> (recur (mov :e :m state))
 
-        ;; 0x66
-        ;; #_=> nil
+        0x5f
+        #_=> (recur (mov :e :a state))
 
-        ;; 0x67
-        ;; #_=> nil
+        0x60
+        #_=> (recur (mov :h :b state))
 
-        ;; 0x68
-        ;; #_=> nil
+        0x61
+        #_=> (recur (mov :h :c state))
 
-        ;; 0x69
-        ;; #_=> nil
+        0x62
+        #_=> (recur (mov :h :d state))
 
-        ;; 0x6c
-        ;; #_=> nil
+        0x63
+        #_=> (recur (mov :h :e state))
 
-        ;; 0x6d
-        ;; #_=> nil
+        0x64
+        #_=> (recur state)
 
-        ;; 0x6e
-        ;; #_=> nil
+        0x65
+        #_=> (recur (mov :h :l state))
 
-        ;; 0x6f
-        ;; #_=> nil
+        0x66
+        #_=> (recur (mov :h :m state))
 
-        ;; 0x70
-        ;; #_=> nil
+        0x67
+        #_=> (recur (mov :h :a state))
 
-        ;; 0x71
-        ;; #_=> nil
+        0x68
+        #_=> (recur (mov :l :b state))
 
-        ;; 0x72
-        ;; #_=> nil
+        0x69
+        #_=> (recur (mov :l :c state))
 
-        ;; 0x73
-        ;; #_=> nil
+        0x6a
+        #_=> (recur (mov :l :d state))
 
-        ;; 0x74
-        ;; #_=> nil
+        0x6b
+        #_=> (recur (mov :l :e state))
+
+        0x6c
+        #_=> (recur (mov :l :h state))
+
+        0x6d
+        #_=> (recur state)
+
+        0x6e
+        #_=> (recur (mov :l :m state))
+
+        0x6f
+        #_=> (recur (mov :l :a state))
+
+        0x70
+        #_=> (recur (mov :m :b state))
+
+        0x71
+        #_=> (recur (mov :m :c state))
+
+        0x72
+        #_=> (recur (mov :m :d state))
+
+        0x73
+        #_=> (recur (mov :m :e state))
+
+        0x74
+        #_=> (recur (mov :m :h state))
+
+        0x75
+        #_=> (recur (mov :m :l state))
 
         ;; 0x76
         ;; #_=> nil
 
-        ;; 0x77
-        ;; #_=> nil
+        0x77
+        #_=> (recur (mov :m :a state))
 
-        ;; 0x78 nil
+        0x78
+        #_=> (recur (mov :a :b state))
 
-        ;; 0x79
-        ;; #_=> nil
+        0x79
+        #_=> (recur (mov :a :c state))
 
-        ;; 0x7a
-        ;; #_=> nil
+        0x7a
+        #_=> (recur (mov :a :d state))
 
-        ;; 0x7b
-        ;; #_=> nil
+        0x7b
+        #_=> (recur (mov :a :e state))
 
-        ;; 0x7c
-        ;; #_=> nil
+        0x7c
+        #_=> (recur (mov :a :h state))
 
-        ;; 0x7d
-        ;; #_=> nil
+        0x7d
+        #_=> (recur (mov :a :l state))
 
-        ;; 0x7e
-        ;; #_=> nil
+        0x7e
+        #_=> (recur (mov :a :m state))
 
-        ;; 0x7f
-        ;; #_=> nil
+        0x7f
+        #_=> (recur state)
 
         0x80
         #_=> (recur (add :b state))
