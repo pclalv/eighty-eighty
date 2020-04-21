@@ -432,11 +432,15 @@
         (update-in [:cpu :pc] inc))))
 
 (defn shld [state]
-  (let [pc (-> state :cpu :pc)
-        memory (:memory state)]
+  (let [{:keys [h l pc]} (-> state :cpu)
+        adr-lsb (-> state :memory (nth (-> pc inc)))
+        adr-msb (-> state :memory (nth (-> pc inc inc)))
+        adr (+ (bit-shift-left adr-msb 8)
+               adr-lsb)]
+    (when debug (println "SHLD" (format "%04x" adr)))
     (-> state
-        (assoc-in [:cpu :l] (nth memory (-> pc inc)))
-        (assoc-in [:cpu :h] (nth memory (-> pc inc inc)))
+        (assoc-in [:memory adr] l)
+        (assoc-in [:memory (inc adr)] h)
         (update-in [:cpu :pc] + 3))))
 
 (defn daa-0 [state]

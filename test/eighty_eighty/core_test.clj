@@ -101,6 +101,19 @@
                rar
                rar)))))
 
+(deftest shld-test
+  ;; example taken from pg. 30 of the 8080 Programmer's Manual
+  (testing "return value"
+    (is (= '(0 41 174 0) ;; address in range 0x0109 - 0x010c
+           (->> (shld {:cpu {:h 0xae
+                             :l 0x29
+                             :pc 0}
+                       :memory (->> (-> 0x010a (repeat 0))
+                                    (concat [0x22 0x0a 0x01])
+                                    vec)})
+                :memory
+                (drop 0x0109))))))
+
 (deftest daa-test
   ;; example taken from pg. 16 of the 8080 Programmer's Manual
   (testing "return value"
