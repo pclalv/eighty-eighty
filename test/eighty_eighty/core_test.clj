@@ -193,3 +193,16 @@
                            :c 0x01
                            :pc 0}
                      :memory [0x02 0x00]})))))
+
+(deftest inx-test
+  (testing "return value"
+    (is (= {:cpu {:sp 0x00
+                  :pc 1}}
+           (inx :sp {:cpu {:sp 0xffff
+                           :pc 0}})))
+    (is (= {:cpu {:d 0x39
+                  :e 0x00
+                  :pc 1}}
+           (inx :d {:cpu {:d 0x38
+                          :e 0xff
+                          :pc 0}})))))

@@ -29,14 +29,17 @@
   [i]
   (clojure.pprint/cl-format nil "~8'0b" i))
 
+(defn get-r-lsb [r-msb]
+  (case r-msb
+    :b :c
+    :d :e
+    :h :l
+    (throw (Exception. (str "Unknown register: " (name r-msb))))))
+
 (defn get-r16
   "Get a 16-bit register."
-  [r state]  
-  (let [[r-msb r-lsb] (case r
-                        :b [:b :c]
-                        :d [:d :e]
-                        :h [:h :l]
-                        (throw (Exception. (str "Unknown register: " (name r)))))
+  [r-msb state]  
+  (let [r-lsb (get-r-lsb r-msb)
         {msb r-msb
          lsb r-lsb} (:cpu state)
         r16 (-> (+ (bit-shift-left msb 8)
@@ -149,10 +152,7 @@
 (defmethod lxi :default
   [r-msb state]
   (let [pc (-> state :cpu :pc)
-        r-lsb (case r-msb
-                :b :c
-                :d :e
-                :h :l)
+        r-lsb (get-r-lsb r-msb)
         memory (:memory state)
         lsb (nth memory (+ 1 pc))
         msb (nth memory (+ 2 pc))
@@ -177,34 +177,28 @@
 (defmulti inx (fn [r-msb _state] r-msb))
 (defmethod inx :sp
   [_ state]
-  (let [sp (:sp cpu)
+  (let [sp (-> state :cpu :sp)
         result (-> sp
                    inc
                    (bit-and 0xffff))]
     (println "INX SP")
     (-> state
-        (assoc [:cpu :sp] sp)
+        (assoc-in [:cpu :sp] result)
         (update-in [:cpu :pc] inc))))
 
 (defmethod inx :default
   [r-msb state]
-  (let [r-lsb (case r-msb
-                :b :c
-                :d :e
-                :h :l)
-        {msb r-msb
-         lsb r-lsb} cpu
-        d16 (+ (bit-shift-left msb 8)
-               lsb)
-        result (-> d16
+  (let [r16 (get-r16 r-msb state)
+        r-lsb (get-r-lsb r-msb)
+        result (-> r16
                    inc
                    (bit-and 0xffff))
         msb' (bit-shift-right result 8)
         lsb' (bit-and result 0xff)]
-    (when debug (println "INX" r-msb))
+    (when debug (println "INX" (-> r-msb name clojure.string/upper-case)))
     (-> state
-        (update [:cpu] merge {r-msb msb'
-                              r-lsb lsb'})
+        (assoc-in [:cpu r-msb] msb')
+        (assoc-in [:cpu r-lsb] lsb')
         (update-in [:cpu :pc] inc))))
 
 (defmulti inr (fn [r _state] r))
