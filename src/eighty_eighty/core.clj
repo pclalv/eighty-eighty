@@ -91,9 +91,9 @@
 
 (defn flag-ac [a0 a1]
   ;; TODO: does this only work for addition?  
-  (let [a0-nybble (bit-and a0 2r00001111)
-        a1-nybble (bit-and a1 2r00001111)]
-    (if (>= (+ a0-nybble a1-nybble) 2r00010000)
+  (let [sum (+ (bit-and a0 0xf)
+               (bit-and a1 0xf))]
+    (if (> sum 0xf)
       1
       0)))
 
