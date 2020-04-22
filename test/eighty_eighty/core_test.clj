@@ -232,3 +232,24 @@
                           :l 0x01
                           :pc 0}
                     :memory [0x00 0x40]})))))
+
+(deftest dad-test
+  (testing "return value"
+    (is (= {:cpu {:h 0x08
+                  :l 0x64
+                  :pc 1}
+            :flags {:cy 0}}
+           (dad :h {:cpu {:h 0x04
+                          :l 0x32
+                          :pc 0}})))
+    (is (= {:cpu {:b 0x33
+                  :c 0x9f
+                  :h 0xd5
+                  :l 0x1a
+                  :pc 1}
+            :flags {:cy 0}}
+           (dad :b {:cpu {:b 0x33
+                          :c 0x9f
+                          :h 0xa1
+                          :l 0x7b
+                          :pc 0}})))))

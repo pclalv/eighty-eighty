@@ -81,6 +81,18 @@
       1
       0)))
 
+;; TODO: factor out a carry function that accepts the byte at which
+;; we're looking for a carry. this code needs to check for 4-bit,
+;; 8-bit, and 16-bit carries.
+
+(defn flag-cy-16 [a0 a1]
+  ;; TODO: does this only work for addition?
+  (let [sum (+ (bit-and a0 0xffff)
+               (bit-and a1 0xffff))]
+    (if (> sum 0xffff)
+      1
+      0)))
+
 (defn flag-cy [a0 a1]
   ;; TODO: does this only work for addition?
   (let [sum (+ (bit-and a0 0xff)
@@ -345,42 +357,36 @@
         (assoc-in [:flags :cy] cy')
         (update-in [:cpu :pc] inc))))
 
-(defn dad [r-msb state]
-  (let [r16 (get-r16 r-msb state)
-        hl (get-r16 :h state)
-        result (bit-and (+ hl r16)
-                        0xffff)
-        h' (bit-shift-right result 8)
-        l' (bit-and result 0xff)
-        ;; 16-bit carry; extract into fn?
-        cy (-> (+ hl r16)
-               (bit-and 0xffff0000)
-               (> 0))]
-    (when debug (println "DAD" (-> r-msb name clojure.string/upper-case)))
-    (-> state
-        (assoc-in [:cpu :h] h')
-        (assoc-in [:cpu :l] l')
-        (update-in [:cpu :pc] inc)
-        (update :flags merge {:cy cy}))))
-
-(defn dad-sp [state]
+(defmulti dad (fn [r _state] r))
+(defmethod dad :sp
+  [_ state]
   (let [sp (-> state :cpu :sp)
         hl (get-r16 :h state)
         result (bit-and (+ hl sp)
                         0xffff)
         h' (bit-shift-right result 8)
-        l' (bit-and result 0xff)
-        
-        ;; 16-bit carry; extract into fn?
-        cy (-> (+ hl sp)
-               (bit-and 0xffff0000)
-               (> 0))]
+        l' (bit-and result 0xff)]
     (when debug (println "DAD SP"))
     (-> state
         (assoc-in [:cpu :h] h')
         (assoc-in [:cpu :l] l')
         (update-in [:cpu :pc] inc)
-        (update :flags merge {:cy cy}))))
+        (update :flags merge {:cy (flag-cy-16 hl sp)}))))
+
+(defmethod dad :default
+  [r-msb state]
+  (let [r16 (get-r16 r-msb state)
+        hl (get-r16 :h state)
+        result (bit-and (+ hl r16)
+                        0xffff)
+        h' (bit-shift-right result 8)
+        l' (bit-and result 0xff)]
+    (when debug (println "DAD" (-> r-msb name clojure.string/upper-case)))
+    (-> state
+        (assoc-in [:cpu :h] h')
+        (assoc-in [:cpu :l] l')
+        (update-in [:cpu :pc] inc)
+        (update :flags merge {:cy (flag-cy-16 hl r16)}))))
 
 (defn ldax [r-msb state]
   (let [r16 (get-r16 r-msb state)
@@ -749,7 +755,7 @@
         ;; deliberately undefined
 
         0x39
-        #_=> (recur (dad-sp state))
+        #_=> (recur (dad :sp state))
 
         0x3a
         #_=> (recur (lda state))
