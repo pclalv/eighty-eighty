@@ -206,3 +206,29 @@
            (inx :d {:cpu {:d 0x38
                           :e 0xff
                           :pc 0}})))))
+
+(deftest inr-test
+  (testing "return value"
+    (is (= {:cpu {:c 0x9a
+                  :pc 1}
+            :flags {:z 0
+                    :s 1
+                    :p 1
+                    :ac 0}}
+           (inr :c {:cpu {:c 0x99
+                          :pc 0}})))))
+
+(deftest dcr-test
+  (testing "return value"
+    (is (= {:cpu {:h 0x00
+                  :l 0x01
+                  :pc 1}
+            :memory [0x00 0x3f]
+            :flags {:z 0
+                    :s 0
+                    :p 1
+                    :ac 0}}
+           (dcr :m {:cpu {:h 0x00
+                          :l 0x01
+                          :pc 0}
+                    :memory [0x00 0x40]})))))

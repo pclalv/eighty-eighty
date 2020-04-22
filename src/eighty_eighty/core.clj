@@ -235,7 +235,7 @@
   [_ state]
   (let [hl (get-r16 :h state)
         v (-> state :memory (nth hl))
-        result (-> hl dec (bit-and 0xff))]
+        result (-> v dec (bit-and 0xff))]
     (when debug (println "DCR M"))
     (-> state
         (assoc-in [:memory hl] result)
@@ -243,8 +243,8 @@
         (update :flags merge {:z (flag-z result)
                               :s (flag-s result)
                               :p (flag-p result)
-                              :ac (flag-ac result)}))))
-  
+                              :ac (flag-ac v -1)}))))
+
 (defmethod dcr :default
   [r state]
   (let [v (-> state :cpu r)
