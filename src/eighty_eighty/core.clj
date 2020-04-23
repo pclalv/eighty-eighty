@@ -119,16 +119,19 @@
   (let [a (-> state :cpu :a)
         hl (get-r16 :h state)
         m (-> state :memory (nth hl))
-        result (-> (+ a m)
-                   (bit-and 0xff))]
+        addend m
+
+        result (->> addend
+                    (+ a)
+                    (bit-and 0xff))]
     (-> state
         (assoc-in [:cpu :a] result)
         (update-in [:cpu :pc] inc)
         (assoc :flags {:z (flag-z result)
                        :s (flag-s result)
                        :p (flag-p result)
-                       :cy (flag-cy a m)
-                       :ac (flag-ac result)}))))
+                       :cy (flag-cy a addend)
+                       :ac (flag-ac a addend)}))))
 
 (defmethod add :default
   [r state]
@@ -139,16 +142,19 @@
         ;; 16-bit number. That makes it easy to figure out if the math
         ;; generated a carry out of it."
         ;; hence the (bit-and 0xff)
-        result (-> (+ a v)
-                   (bit-and 0xff))]
+        addend v
+
+        result (->> addend
+                    (+ a)
+                    (bit-and 0xff))]
     (-> state
         (assoc-in [:cpu :a] result)
         (update-in [:cpu :pc] inc)
         (update :flags merge {:z (flag-z result)
                               :s (flag-s result)
                               :p (flag-p result)
-                              :cy (flag-cy a v)
-                              :ac (flag-ac a v)}))))
+                              :cy (flag-cy a addend)
+                              :ac (flag-ac a addend)}))))
 
 (defmulti lxi (fn [r _state] r))
 (defmethod lxi :sp
