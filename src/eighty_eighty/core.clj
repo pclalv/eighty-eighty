@@ -112,40 +112,16 @@
       1
       0)))
 
-(defmulti add (fn [r _state] r))
-(defmethod add :m
-  [_ state]
-  (when debug (println "ADD M"))
-  (let [a (-> state :cpu :a)
-        hl (get-r16 :h state)
-        m (-> state :memory (nth hl))
-        addend m
-
-        result (->> addend
-                    (+ a)
-                    (bit-and 0xff))]
-    (-> state
-        (assoc-in [:cpu :a] result)
-        (update-in [:cpu :pc] inc)
-        (assoc :flags {:z (flag-z result)
-                       :s (flag-s result)
-                       :p (flag-p result)
-                       :cy (flag-cy a addend)
-                       :ac (flag-ac a addend)}))))
-
-(defmethod add :default
-  [r state]
-  (when debug (println "ADD" (-> r name clojure.string/upper-case)))
-  (let [{a :a
-         v r} (:cpu state)
+(defn add* [v state & {with-carry :with-carry}]
+  (let [addends (if with-carry
+                  [(-> state :cpu :a) v (-> state :flags :cy)]
+                  [(-> state :cpu :a) v])
         ;; "I am emulating the 8-bit math instructions by using a
         ;; 16-bit number. That makes it easy to figure out if the math
         ;; generated a carry out of it."
-        ;; hence the (bit-and 0xff)
-        addend v
-
-        result (->> addend
-                    (+ a)
+        ;; hence the (bit-and 0xff)]
+        result (->> addends
+                    (apply +)
                     (bit-and 0xff))]
     (-> state
         (assoc-in [:cpu :a] result)
@@ -153,8 +129,24 @@
         (update :flags merge {:z (flag-z result)
                               :s (flag-s result)
                               :p (flag-p result)
-                              :cy (flag-cy a addend)
-                              :ac (flag-ac a addend)}))))
+                              :cy (apply flag-cy addends)
+                              :ac (apply flag-ac addends)}))))
+
+(defmulti add (fn [r _state] r))
+(defmethod add :m
+  [_ state]
+  (when debug (println "ADD M"))
+  (let [a (-> state :cpu :a)
+        hl (get-r16 :h state)
+        m (-> state :memory (nth hl))]
+    (add* m state)))
+
+(defmethod add :default
+  [r state]
+  (when debug (println "ADD" (-> r name clojure.string/upper-case)))
+  (let [{a :a
+         v r} (:cpu state)]
+    (add* v state)))
 
 (defmulti lxi (fn [r _state] r))
 (defmethod lxi :sp
