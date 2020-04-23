@@ -117,7 +117,7 @@
   [_ state]
   (let [a (-> state :cpu :a)
         hl (get-r16 :h state)
-        m (-> state :cpu (nth hl))
+        m (-> state :memory (nth hl))
         result (-> (+ a m)
                    (bit-and 0xff))]
     (when debug (println "ADD M"))

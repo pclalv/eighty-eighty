@@ -253,3 +253,37 @@
                           :h 0xa1
                           :l 0x7b
                           :pc 0}})))))
+
+(deftest add-test
+  (testing "return value"
+    (is (= {:cpu {:a 0x08
+                  :pc 1}
+            :flags {:z 0
+                    :s 0
+                    :p 0
+                    :cy 0
+                    :ac 0}}
+           (add :a {:cpu {:a 0x04
+                          :pc 0}})))
+    (is (= {:cpu {:a 0x6e
+                  :h 0x00
+                  :l 0x02
+                  :pc 1}
+            :flags {:z 0, :cy 0, :ac 0, :p 0, :s 0},
+            :memory [0 0 2]}
+           (add :m {:cpu {:a 0x6c
+                          :h 0x00
+                          :l 0x02
+                          :pc 0}
+                    :memory [0x00 0x00 0x02]})))
+    (is (= {:cpu {:a 0x9a
+                  :d 0x2e
+                  :pc 1}
+            :flags {:z 0
+                    :s 1
+                    :p 1
+                    :cy 0
+                    :ac 1}}
+           (add :d {:cpu {:a 0x6c
+                          :d 0x2e
+                          :pc 0}})))))
