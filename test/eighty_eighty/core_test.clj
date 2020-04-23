@@ -287,3 +287,29 @@
            (add :d {:cpu {:a 0x6c
                           :d 0x2e
                           :pc 0}})))))
+(deftest adc-test
+  (testing "return value"    
+    (is (= {:cpu {:a 0x80
+                  :c 0x3d
+                  :pc 1}
+            :flags {:cy 0
+                    :s 1
+                    :z 0
+                    :p 0
+                    :ac 1}}
+           (adc :c {:cpu {:a 0x42
+                          :c 0x3d
+                          :pc 0}
+                    :flags {:cy 1}})))
+    (is (= {:cpu {:a 0x7f
+                  :c 0x3d
+                  :pc 1}
+            :flags {:cy 0
+                    :s 0
+                    :z 0
+                    :p 0
+                    :ac 0}}
+           (adc :c {:cpu {:a 0x42
+                          :c 0x3d
+                          :pc 0}
+                    :flags {:cy 0}})))))

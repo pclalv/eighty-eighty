@@ -148,6 +148,24 @@
          v r} (:cpu state)]
     (add* v state)))
 
+(defmulti adc (fn [r _state] r))
+(defmethod adc :m
+  [_ state]
+  (when debug (println "ADC M"))
+  (let [a (-> state :cpu :a)
+        hl (get-r16 :h state)
+        m (-> state :memory (nth hl))]
+    (add* m state
+          :with-carry true)))
+
+(defmethod adc :default
+  [r state]
+  (when debug (println "ADC" (-> r name clojure.string/upper-case)))
+  (let [{a :a
+         v r} (:cpu state)]
+    (add* v state
+          :with-carry true)))
+
 (defmulti lxi (fn [r _state] r))
 (defmethod lxi :sp
   [_ state]
@@ -993,17 +1011,29 @@
         0x87
         #_=> (recur (add :a state))
 
-        ;; 0x88
-        ;; #_=> nil
+        0x88
+        #_=> (recur (adc :b state))
 
-        ;; 0x8a
-        ;; #_=> nil
+        0x89
+        #_=> (recur (adc :c state))
 
-        ;; 0x8b
-        ;; #_=> nil
+        0x8a
+        #_=> (recur (adc :d state))
 
-        ;; 0x8e
-        ;; #_=> nil
+        0x8b
+        #_=> (recur (adc :e state))
+
+        0x8c
+        #_=> (recur (adc :h state))
+
+        0x8d
+        #_=> (recur (adc :l state))
+
+        0x8e
+        #_=> (recur (adc :m state))
+
+        0x8f
+        #_=> (recur (adc :a state))
 
         ;; 0x90
         ;; #_=> nil
