@@ -85,26 +85,29 @@
 ;; we're looking for a carry. this code needs to check for 4-bit,
 ;; 8-bit, and 16-bit carries.
 
-(defn flag-cy-16 [a0 a1]
+(defn flag-cy-16 [& addends]
   ;; TODO: does this only work for addition?
-  (let [sum (+ (bit-and a0 0xffff)
-               (bit-and a1 0xffff))]
+  (let [sum (->> addends
+                 (map #(bit-and % 0xffff))
+                 (apply +))]
     (if (> sum 0xffff)
       1
       0)))
 
-(defn flag-cy [a0 a1]
+(defn flag-cy [& addends]
   ;; TODO: does this only work for addition?
-  (let [sum (+ (bit-and a0 0xff)
-               (bit-and a1 0xff))]
+  (let [sum (->> addends
+                 (map #(bit-and % 0xff))
+                 (apply +))]
     (if (> sum 0xff)
       1
       0)))
 
-(defn flag-ac [a0 a1]
+(defn flag-ac [& addends]
   ;; TODO: does this only work for addition?  
-  (let [sum (+ (bit-and a0 0xf)
-               (bit-and a1 0xf))]
+  (let [sum (->> addends
+                 (map #(bit-and % 0xf))
+                 (apply +))]
     (if (> sum 0xf)
       1
       0)))
