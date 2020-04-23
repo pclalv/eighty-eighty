@@ -115,12 +115,12 @@
 (defmulti add (fn [r _state] r))
 (defmethod add :m
   [_ state]
+  (when debug (println "ADD M"))
   (let [a (-> state :cpu :a)
         hl (get-r16 :h state)
         m (-> state :memory (nth hl))
         result (-> (+ a m)
                    (bit-and 0xff))]
-    (when debug (println "ADD M"))
     (-> state
         (assoc-in [:cpu :a] result)
         (update-in [:cpu :pc] inc)
@@ -132,6 +132,7 @@
 
 (defmethod add :default
   [r state]
+  (when debug (println "ADD" (-> r name clojure.string/upper-case)))
   (let [{a :a
          v r} (:cpu state)
         ;; "I am emulating the 8-bit math instructions by using a
@@ -140,7 +141,6 @@
         ;; hence the (bit-and 0xff)
         result (-> (+ a v)
                    (bit-and 0xff))]
-    (when debug (println "ADD" (-> r name clojure.string/upper-case)))
     (-> state
         (assoc-in [:cpu :a] result)
         (update-in [:cpu :pc] inc)
