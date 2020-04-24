@@ -650,10 +650,16 @@
 (defn ana
   [r state]
   (let [a (get-r8 :a state)
-        v (get-r8 r state)]
+        v (get-r8 r state)
+        result (bit-and a v)]
     (when debug (println "ANA" (-> r name clojure.string/upper-case)))
     (-> state
-        (assoc-in [:cpu :a] (bit-and a v))
+        (assoc-in [:cpu :a] result)
+        (update :flags merge {:z (flag-z result)
+                              :s (flag-s result)
+                              :p (flag-p result)
+                              :cy 0})
+        (update-in [:cpu :pc] inc))))
         (update-in [:cpu :pc] inc))))
 
 ;; TODO: continue implementing arithmetic operations
