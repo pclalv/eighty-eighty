@@ -521,13 +521,10 @@
         (update-in [:cpu :pc] inc))))
 
 (defn cmc [state]
-  (let [cy (-> state :flags :cy)
-        cy' (if (= 0 cy)
-              1
-              0)]
+  (let []
     (when debug (println "CMC"))
     (-> state
-        (assoc-in [:flags :cy] cy')
+        (assoc-in [:flags :cy] (-> state :flags :cy (bit-flip 0)))
         (update-in [:cpu :pc] inc))))
 
 (defn sta [state]
