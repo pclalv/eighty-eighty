@@ -163,6 +163,21 @@
     (add* v state
           :with-carry true)))
 
+(defn bit-flip-lsb [b]
+  (bit-flip b 0))
+
+(defn sub [r state]
+  (let [v (-> state :cpu r)]
+    (when debug (println "SUB" (-> r name clojure.string/upper-case)))
+    (-> (add* (-> v bit-not (bit-and 0xff) inc)
+              state)
+        ;; If there is _no_ carry out of the high-order bit position,
+        ;; indicating that a borrow occurred, the Carry bit is _set_;
+        ;; otherwise it is reset. (Note that this differs from an add
+        ;; operation, which resets the carry if no overflow occurs.)
+        ;; - 8080 Programmer's Manual, pg. 18
+        (update-in [:flags :cy] bit-flip-lsb))))
+
 (defmulti lxi (fn [r _state] r))
 (defmethod lxi :sp
   [_ state]
@@ -521,7 +536,7 @@
   (let []
     (when debug (println "CMC"))
     (-> state
-        (assoc-in [:flags :cy] (-> state :flags :cy (bit-flip 0)))
+        (assoc-in [:flags :cy] (-> state :flags :cy bit-flip-lsb))
         (update-in [:cpu :pc] inc))))
 
 (defn sta [state]
@@ -1029,8 +1044,8 @@
         0x8f
         #_=> (recur (adc :a state))
 
-        ;; 0x90
-        ;; #_=> nil
+        0x90
+        #_=> (recur (sub :b state))
 
         ;; 0x94
         ;; #_=> nil

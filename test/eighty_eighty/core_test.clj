@@ -313,3 +313,15 @@
                           :c 0x3d
                           :pc 0}
                     :flags {:cy 0}})))))
+
+(deftest sub-test
+  (testing "return value"
+    (is (= {:cpu {:a 0
+                  :pc 1}
+            :flags {:z 1
+                    :s 0
+                    :p 1
+                    :cy 0
+                    :ac 1}}
+           (sub :a {:cpu {:a 0x3e
+                          :pc 0}})))))
