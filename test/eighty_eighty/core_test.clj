@@ -325,3 +325,18 @@
                     :ac 1}}
            (sub :a {:cpu {:a 0x3e
                           :pc 0}})))))
+
+(deftest sbb-test
+  (testing "return value"
+    (is (= {:cpu {:a 0x01
+                  :l 0x02
+                  :pc 1}
+            :flags {:z 0
+                    :s 0
+                    :p 0
+                    :cy 0
+                    :ac 1}}
+           (sbb :l {:cpu {:a 0x04
+                          :l 0x02
+                          :pc 0}
+                    :flags {:cy 1}})))))

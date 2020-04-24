@@ -198,6 +198,22 @@
     (when debug (println "SUB" (-> r name clojure.string/upper-case)))
     (sub* v state)))
 
+(defmulti sbb (fn [r _state] r))
+
+(defmethod sbb :m
+  [_ state]
+  (let [hl (get-r16 :h state)
+        m (-> state :memory (nth hl))]
+    (when debug (println "SSB M"))
+    (sub* m state :with-carry true)))
+
+(defmethod sbb :default
+  [r state]
+  (let [cy (-> state :flags :cy)
+        v (-> state :cpu r)]
+    (when debug (println "SSB" (-> r name clojure.string/upper-case)))
+    (sub* v state :with-carry true)))
+
 (defmulti lxi (fn [r _state] r))
 (defmethod lxi :sp
   [_ state]
@@ -1067,41 +1083,51 @@
         0x90
         #_=> (recur (sub :b state))
 
-        ;; 0x94
-        ;; #_=> nil
+        0x91
+        #_=> (recur (sub :c state))
 
-        ;; 0x97
-        ;; #_=> nil
+        0x92
+        #_=> (recur (sub :d state))
 
-        ;; 0x98
-        ;; #_=> nil
+        0x93
+        #_=> (recur (sub :e state))
 
-        ;; 0x99
-        ;; #_=> nil
+        0x94
+        #_=> (recur (sub :h state))
 
-        ;; 0x9a
-        ;; #_=> nil
+        0x95
+        #_=> (recur (sub :l state))
 
-        ;; 0x9b
-        ;; #_=> nil
+        0x96
+        #_=> (recur (sub :m state))
 
-        ;; 0x9d
-        ;; #_=> nil
+        0x97
+        #_=> (recur (sub :a state))
 
-        ;; 0x9e
-        ;; #_=> nil
+        0x98
+        #_=> (recur (sbb :b state))
 
-        ;; 0xa0
-        ;; #_=> nil
+        0x99
+        #_=> (recur (sbb :c state))
 
-        ;; 0xa3
-        ;; #_=> nil
+        0x9a
+        #_=> (recur (sbb :d state))
 
-        ;; 0xa6
-        ;; #_=> nil
+        0x9b
+        #_=> (recur (sbb :e state))
 
-        ;; 0xa7
-        ;; #_=> nil
+        0x9c
+        #_=> (recur (sbb :h state))
+
+        0x9d
+        #_=> (recur (sbb :l state))
+
+        0x9e
+        #_=> (recur (sbb :m state))
+
+        0x9f
+        #_=> (recur (sbb :a state))
+
 
         ;; 0xa8
         ;; #_=> nil
