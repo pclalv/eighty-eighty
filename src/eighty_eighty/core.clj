@@ -144,16 +144,14 @@
 (defmethod add :default
   [r state]
   (when debug (println "ADD" (-> r name clojure.string/upper-case)))
-  (let [{a :a
-         v r} (:cpu state)]
+  (let [v (-> state :cpu r)]
     (add* v state)))
 
 (defmulti adc (fn [r _state] r))
 (defmethod adc :m
   [_ state]
   (when debug (println "ADC M"))
-  (let [a (-> state :cpu :a)
-        hl (get-r16 :h state)
+  (let [hl (get-r16 :h state)
         m (-> state :memory (nth hl))]
     (add* m state
           :with-carry true)))
@@ -161,8 +159,7 @@
 (defmethod adc :default
   [r state]
   (when debug (println "ADC" (-> r name clojure.string/upper-case)))
-  (let [{a :a
-         v r} (:cpu state)]
+  (let [v (-> state :cpu r)]
     (add* v state
           :with-carry true)))
 
