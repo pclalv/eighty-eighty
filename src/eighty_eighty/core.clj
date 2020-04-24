@@ -47,6 +47,17 @@
                 (bit-and 0xffff))]
     r16))
 
+(defmulti get-r8 (fn [r _state] r))
+
+(defmethod get-r8 :m
+  [_ state]
+  (let [hl (get-r16 :h state)]
+    (-> state :memory (nth hl))))
+
+(defmethod get-r8 :default
+  [r state]
+  (-> state :cpu r))
+
 ;;;;;;;;;;;
 ;; flags ;;
 ;;;;;;;;;;;
@@ -636,6 +647,15 @@
         (assoc-in [:cpu r-dst] (-> state :cpu r-src))
         (update-in [:cpu :pc] inc))))
 
+(defn ana
+  [r state]
+  (let [a (get-r8 :a state)
+        v (get-r8 r state)]
+    (when debug (println "ANA" (-> r name clojure.string/upper-case)))
+    (-> state
+        (assoc-in [:cpu :a] (bit-and a v))
+        (update-in [:cpu :pc] inc))))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -1128,6 +1148,29 @@
         0x9f
         #_=> (recur (sbb :a state))
 
+        0xa0
+        #_=> (recur (ana :b state))
+
+        0xa1
+        #_=> (recur (ana :c state))
+
+        0xa2
+        #_=> (recur (ana :d state))
+
+        0xa3
+        #_=> (recur (ana :e state))
+
+        0xa4
+        #_=> (recur (ana :h state))
+
+        0xa5
+        #_=> (recur (ana :l state))
+
+        0xa6
+        #_=> (recur (ana :m state))
+
+        0xa7
+        #_=> (recur (ana :a state))
 
         ;; 0xa8
         ;; #_=> nil

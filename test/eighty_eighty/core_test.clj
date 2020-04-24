@@ -340,3 +340,22 @@
                           :l 0x02
                           :pc 0}
                     :flags {:cy 1}})))))
+
+(deftest ana-test
+  (testing "return value"
+    (is (= {:cpu {:a 2r00001100
+                  :h 0x00
+                  :l 0x01
+                  :pc 1}
+            :memory [0x00 2r00001111]}
+           (ana :m {:cpu {:a 2r11111100
+                          :h 0x00
+                          :l 0x01
+                          :pc 0}
+                    :memory [0x00 2r00001111]})))
+    (is (= {:cpu {:a 2r00001100
+                  :c 2r00001111
+                  :pc 1}}
+           (ana :c {:cpu {:a 2r11111100
+                          :c 2r00001111
+                          :pc 0}})))))
