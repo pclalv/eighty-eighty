@@ -38,7 +38,7 @@
 
 (defn get-r16
   "Get a 16-bit register."
-  [r-msb state]  
+  [r-msb state]
   (let [r-lsb (get-r-lsb r-msb)
         {msb r-msb
          lsb r-lsb} (:cpu state)
