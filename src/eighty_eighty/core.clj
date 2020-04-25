@@ -658,6 +658,42 @@
         (update :flags merge {:z (flag-z result)
                               :s (flag-s result)
                               :p (flag-p result)
+                              ;; TODO: figure out if/how ac is affected
+                              :cy 0})
+        (update-in [:cpu :pc] inc))))
+
+(defn xra
+  [r state]
+  (let [a (get-r8 :a state)
+        v (get-r8 r state)
+        result (bit-xor a v)]
+    (when debug (println "XRA" (-> r name clojure.string/upper-case)))
+    (-> state
+        (assoc-in [:cpu :a] result)
+        (update :flags merge {:z (flag-z result)
+                              :s (flag-s result)
+                              :p (flag-p result)
+                              ;; docs suggest that this affects the ac
+                              ;; flag but i'm gonna assume that's
+                              ;; wrong because nowhere does it say
+                              ;; _how_ ac is affected. it's possible
+                              ;; that an actual CPU would zero it out;
+                              ;; we'll see.
+                              ;; TODO: figure out if/how ac is affected
+                              :cy 0})
+        (update-in [:cpu :pc] inc))))
+
+(defn ora [r state]
+  (let [a (get-r8 :a state)
+        v (get-r8 r state)
+        result (bit-or a v)]
+    (when debug (println "ORA" (-> r name clojure.string/upper-case)))
+    (-> state
+        (assoc-in [:cpu :a] result)
+        (update :flags merge {:z (flag-z result)
+                              :s (flag-s result)
+                              :p (flag-p result)
+                              ;; TODO: figure out if/how ac is affected
                               :cy 0})
         (update-in [:cpu :pc] inc))))
         (update-in [:cpu :pc] inc))))
@@ -1178,29 +1214,56 @@
         0xa7
         #_=> (recur (ana :a state))
 
-        ;; 0xa8
-        ;; #_=> nil
+        0xa8
+        #_=> (recur (xra :b state))
 
-        ;; 0xaa
-        ;; #_=> nil
+        0xa9
+        #_=> (recur (xra :c state))
 
-        ;; 0xaf
-        ;; #_=> nil
+        0xaa
+        #_=> (recur (xra :d state))
 
-        ;; 0xb0
-        ;; #_=> nil
+        0xab
+        #_=> (recur (xra :e state))
 
-        ;; 0xb3
-        ;; #_=> nil
+        0xac
+        #_=> (recur (xra :h state))
 
-        ;; 0xb4
-        ;; #_=> nil
+        0xad
+        #_=> (recur (xra :l state))
 
-        ;; 0xb6
-        ;; #_=> nil
+        0xae
+        #_=> (recur (xra :m state))
 
-        ;; 0xb8
-        ;; #_=> nil
+        0xaf
+        #_=> (recur (xra :a state))
+
+        0xb0
+        #_=> (recur (ora :b state))
+
+        0xb1
+        #_=> (recur (ora :c state))
+
+        0xb2
+        #_=> (recur (ora :d state))
+
+        0xb3
+        #_=> (recur (ora :e state))
+
+        0xb4
+        #_=> (recur (ora :h state))
+
+        0xb5
+        #_=> (recur (ora :l state))
+
+        0xb6
+        #_=> (recur (ora :m state))
+
+        0xb7
+        #_=> (recur (ora :a state))
+
+        0xb8
+        #_=> (recur (cmp :b state))
 
         ;; 0xbb
         ;; #_=> nil

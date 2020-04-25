@@ -367,3 +367,48 @@
            (ana :c {:cpu {:a 2r11111100
                           :c 2r00001111
                           :pc 0}})))))
+
+(deftest xra-test
+  (testing "return value"
+    (is (= {:cpu {:a 0
+                  :pc 1}
+            :flags {:z 1
+                    :s 0
+                    :p 1
+                    :cy 0}}
+           (xra :a {:cpu {:a 0x88
+                          :pc 0}})))
+    ;; a's value is the one's complement of b's value
+    (is (= {:cpu {:a 2r11000101
+                  :b 2r00111010
+                  :pc 1}
+            :flags {:z 0
+                    :s 1
+                    :p 1
+                    :cy 0}}
+           (xra :b {:cpu {:a 0xff
+                          :b 2r00111010
+                          :pc 0}})))))
+
+(deftest ora-test
+  (testing "return value"
+    (is (= {:cpu {:a 0x5f
+                  :b 0x5f
+                  :pc 1}
+            :flags {:z 0
+                    :s 0
+                    :p 1
+                    :cy 0}}
+           (ora :b {:cpu {:a 0
+                          :b 0x5f
+                          :pc 0}})))
+    (is (= {:cpu {:a 2r10101111
+                  :b 2r10100000
+                  :pc 1}
+            :flags {:z 0
+                    :s 1
+                    :p 1
+                    :cy 0}}
+           (ora :b {:cpu {:a 2r00001111
+                          :b 2r10100000
+                          :pc 0}})))))
