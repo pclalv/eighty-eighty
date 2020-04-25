@@ -821,8 +821,8 @@
         0x1f
         #_=> (recur (rar state))
 
-        0x20
-        #_=> (recur state)
+        ;; 0x20 ;; RIM
+        ;; deliberately undefined
 
         0x21
         #_=> (recur (lxi :h state))
@@ -869,7 +869,7 @@
         0x2f
         #_=> (recur (cma state))
 
-        ;; 0x30
+        ;; 0x30 ;; SIM
         ;; deliberately undefined
 
         0x31
@@ -918,8 +918,7 @@
         #_=> (recur (cmc state))
 
         0x40
-        ;; MOV B,B
-        #_=> (recur state)
+        #_=> (recur (mov :b :b state))
 
         0x41
         #_=> (recur (mov :b :c state))
@@ -946,7 +945,7 @@
         #_=> (recur (mov :c :b state))
 
         0x49
-        #_=> (recur state)
+        #_=> (recur (mov :c :c state))
 
         0x4a
         #_=> (recur (mov :c :d state))
@@ -973,7 +972,7 @@
         #_=> (recur (mov :d :c state))
 
         0x52
-        #_=> (recur state)
+        #_=> (recur (mov :d :d state))
 
         0x53
         #_=> (recur (mov :d :e state))
@@ -1000,7 +999,7 @@
         #_=> (recur (mov :e :d state))
 
         0x5b
-        #_=> (recur state)
+        #_=> (recur (mov :e :e state))
 
         0x5c
         #_=> (recur (mov :e :h state))
@@ -1027,7 +1026,7 @@
         #_=> (recur (mov :h :e state))
 
         0x64
-        #_=> (recur state)
+        #_=> (recur (mov :h :h state))
 
         0x65
         #_=> (recur (mov :h :l state))
@@ -1054,7 +1053,7 @@
         #_=> (recur (mov :l :h state))
 
         0x6d
-        #_=> (recur state)
+        #_=> (recur (mov :l :l state))
 
         0x6e
         #_=> (recur (mov :l :m state))
@@ -1108,7 +1107,7 @@
         #_=> (recur (mov :a :m state))
 
         0x7f
-        #_=> (recur state)
+        #_=> (recur (mov :a :a state))
 
         0x80
         #_=> (recur (add :b state))
