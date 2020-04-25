@@ -164,16 +164,17 @@
 (defn bit-flip-lsb [b]
   (bit-flip b 0))
 
+(defn two's-complement [v]
+  (-> v
+      bit-not
+      (bit-and 0xff)
+      inc))
+
 (defn sub* [v state & {with-carry :with-carry}]
   (let [carry-increment (if with-carry
                           (-> state :flags :cy)
-                          0)
-        v-two's-complement (-> v
-                               (+ carry-increment)
-                               bit-not
-                               (bit-and 0xff)
-                               inc)]
-    (-> (add* v-two's-complement
+                          0)]
+    (-> (add* (-> v (+ carry-increment) two's-complement)
               state)
         ;; If there is _no_ carry out of the high-order bit position,
         ;; indicating that a borrow occurred, the Carry bit is _set_;
