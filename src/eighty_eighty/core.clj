@@ -668,6 +668,52 @@
         (assoc-in [:cpu :pc] pc')
         (update-in [:cpu :sp] + 2))))
 
+(defn flag-c? [state]
+  (= 1 (-> state :flags :cy)))
+
+(defn rc [state]
+  (if (flag-c? state)
+    (ret state)
+    state))
+
+(defn rnc [state]
+  (if (not (flag-c? state))
+    (ret state)
+    state))
+
+(defn flag-z? [state]
+  (= 1 (-> state :flags :z)))
+
+(defn rz [state]
+  (if (flag-z? state)
+    (ret state)
+    state))
+
+(defn rnz [state]
+  (if (not (flag-z? state))
+    (ret state)
+    state))
+
+(defn rm [state]
+  (if (= 1 (-> state :flags :s))
+    (ret state)
+    state))
+
+(defn rp [state]
+  (if (= 0 (-> state :flags :s))
+    (ret state)
+    state))
+
+(defn rpe [state]
+  (if (= 1 (-> state :flags :p))
+    (ret state)
+    state))
+
+(defn rpo [state]
+  (if (= 0 (-> state :flags :p))
+    (ret state)
+    state))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -1256,7 +1302,8 @@
         0xbf
         #_=> (recur (cmp :a state))
 
-        ;; 0xc0 nil
+        0xc0
+        #_=> (recur (rnz state))
 
         ;; 0xc1
         ;; #_=> nil
@@ -1286,8 +1333,8 @@
                                          :p (flag-p result)
                                          :pad 0}))))
 
-        ;; 0xc8
-        ;; #_=> nil
+        0xc8
+        #_=> (recur (rz state))
 
         0xc9
         #_=> (recur (ret state))
@@ -1304,8 +1351,8 @@
         ;; 0xcd
         ;; #_=> nil
 
-        ;; 0xd0
-        ;; #_=> nil
+        0xd0
+        #_=> (recur (rnc state))
 
         ;; 0xd1
         ;; #_=> nil
@@ -1325,8 +1372,8 @@
         ;; 0xd6
         ;; #_=> nil
 
-        ;; 0xd8
-        ;; #_=> nil
+        0xd8
+        #_=> (recur (rc state))
 
         ;; 0xda
         ;; #_=> nil
@@ -1337,8 +1384,8 @@
         ;; 0xde
         ;; #_=> nil
 
-        ;; 0xe0
-        ;; #_=> nil
+        0xe0
+        #_=> (recur (rpo state))
 
         ;; 0xe1
         ;; #_=> nil
@@ -1355,6 +1402,9 @@
         ;; 0xe6
         ;; #_=> nil
 
+        0xe8
+        #_=> (recur (rpe state))
+
         ;; 0xe9
         ;; #_=> nil
 
@@ -1366,8 +1416,8 @@
         ;; 0xee
         ;; #_=> nil
 
-        ;; 0xf0
-        ;; #_=> nil
+        0xf0
+        #_=> (recur (rp state))
 
         ;; 0xf1
         ;; #_=> nil
@@ -1378,8 +1428,8 @@
         ;; 0xf6
         ;; #_=> nil
 
-        ;; 0xf8
-        ;; #_=> nil
+        0xf8
+        #_=> (recur (rm state))
 
         ;; 0xfa
         ;; #_=> nil
