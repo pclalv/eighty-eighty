@@ -651,7 +651,6 @@
 (defn cmp [r state]
   (let [a (get-r8 :a state)
         v (get-r8 r state)]
-    (println "v" v)
     (when debug (println "CMP" (-> r name clojure.string/upper-case)))
     (-> (sub* v state)
         ;; unlike subtraction operations, cmp does not affect a
