@@ -242,6 +242,15 @@
            (dad :h {:cpu {:h 0x04
                           :l 0x32
                           :pc 0}})))
+    (is (= {:cpu {:h 0xd5
+                  :l 0x1a
+                  :sp 0x339f
+                  :pc 1}
+            :flags {:cy 0}}
+           (dad :sp {:cpu {:h 0xa1
+                           :l 0x7b
+                           :sp 0x339f
+                           :pc 0}})))
     (is (= {:cpu {:b 0x33
                   :c 0x9f
                   :h 0xd5
