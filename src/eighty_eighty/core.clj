@@ -36,8 +36,15 @@
     :h :l
     (throw (Exception. (str "Unknown register: " (name r-msb))))))
 
-(defn get-r16
+(defmulti get-r16 
   "Get a 16-bit register."
+  (fn [r-msb _state] r-msb))
+
+(defmethod get-r16 :sp
+  [_ state]
+  (-> state :cpu :sp))
+
+(defmethod get-r16 :default
   [r-msb state]
   (let [r-lsb (get-r-lsb r-msb)
         {msb r-msb
@@ -395,24 +402,7 @@
         (assoc-in [:flags :cy] cy')
         (update-in [:cpu :pc] inc))))
 
-(defmulti dad (fn [r _state] r))
-(defmethod dad :sp
-  [_ state]
-  (let [sp (-> state :cpu :sp)
-        hl (get-r16 :h state)
-        result (bit-and (+ hl sp)
-                        0xffff)
-        h' (bit-shift-right result 8)
-        l' (bit-and result 0xff)]
-    (when debug (println "DAD SP"))
-    (-> state
-        (assoc-in [:cpu :h] h')
-        (assoc-in [:cpu :l] l')
-        (update-in [:cpu :pc] inc)
-        (update :flags merge {:cy (flag-cy-16 hl sp)}))))
-
-(defmethod dad :default
-  [r-msb state]
+(defn dad [r-msb state]
   (let [r16 (get-r16 r-msb state)
         hl (get-r16 :h state)
         result (bit-and (+ hl r16)
