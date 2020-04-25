@@ -143,34 +143,14 @@
                               :cy (apply flag-cy addends)
                               :ac (apply flag-ac addends)}))))
 
-(defmulti add (fn [r _state] r))
-(defmethod add :m
-  [_ state]
-  (when debug (println "ADD M"))
-  (let [a (-> state :cpu :a)
-        hl (get-r16 :h state)
-        m (-> state :memory (nth hl))]
-    (add* m state)))
-
-(defmethod add :default
-  [r state]
+(defn add [r state]
   (when debug (println "ADD" (-> r name clojure.string/upper-case)))
-  (let [v (-> state :cpu r)]
+  (let [v (get-r8 r state)]
     (add* v state)))
 
-(defmulti adc (fn [r _state] r))
-(defmethod adc :m
-  [_ state]
-  (when debug (println "ADC M"))
-  (let [hl (get-r16 :h state)
-        m (-> state :memory (nth hl))]
-    (add* m state
-          :with-carry true)))
-
-(defmethod adc :default
-  [r state]
+(defn adc [r state]
   (when debug (println "ADC" (-> r name clojure.string/upper-case)))
-  (let [v (-> state :cpu r)]
+  (let [v (get-r8 r state)]
     (add* v state
           :with-carry true)))
 
@@ -195,33 +175,13 @@
         ;; - 8080 Programmer's Manual, pg. 18
         (update-in [:flags :cy] bit-flip-lsb))))
 
-(defmulti sub (fn [r _state] r))
-(defmethod sub :m
-  [_ state]
-  (let [hl (get-r16 :h state)
-        m (-> state :memory (nth hl))]
-    (when debug (println "SUB M"))
-    (sub* m state)))
-
-(defmethod sub :default
-  [r state]
-  (let [v (-> state :cpu r)]
+(defn sub [r state]
+  (let [v (get-r8 r state)]
     (when debug (println "SUB" (-> r name clojure.string/upper-case)))
     (sub* v state)))
 
-(defmulti sbb (fn [r _state] r))
-
-(defmethod sbb :m
-  [_ state]
-  (let [hl (get-r16 :h state)
-        m (-> state :memory (nth hl))]
-    (when debug (println "SSB M"))
-    (sub* m state :with-carry true)))
-
-(defmethod sbb :default
-  [r state]
-  (let [cy (-> state :flags :cy)
-        v (-> state :cpu r)]
+(defn sbb [r state]
+  (let [v (get-r8 r state)]
     (when debug (println "SSB" (-> r name clojure.string/upper-case)))
     (sub* v state :with-carry true)))
 
