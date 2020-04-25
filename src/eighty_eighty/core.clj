@@ -657,6 +657,17 @@
         ;; unlike subtraction operations, cmp does not affect a
         (assoc-in [:cpu :a] a))))
 
+(defn ret [state]
+  (let [sp (get-r16 :sp state)
+        memory (:memory state)
+        pc-lsb (-> state :memory (nth sp))
+        pc-msb (-> state :memory (nth (inc sp)))
+        pc' (+ (bit-shift-left pc-msb 8)
+               pc-lsb)]
+    (-> state
+        (assoc-in [:cpu :pc] pc')
+        (update-in [:cpu :sp] + 2))))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -1278,8 +1289,8 @@
         ;; 0xc8
         ;; #_=> nil
 
-        ;; 0xc9
-        ;; #_=> nil
+        0xc9
+        #_=> (recur (ret state))
 
         ;; 0xca
         ;; #_=> nil
