@@ -714,6 +714,21 @@
     (ret state)
     state))
 
+(defn adi [state]
+  (let [{a :a
+         pc :pc} (:cpu state)
+        d8 (-> state :memory (nth (inc pc)))
+        result (+ a d8)]
+    (when debug (println "ADI" d8))
+    (-> state
+        (assoc-in [:cpu :a] (bit-and result 0xff))
+        (update-in [:cpu :pc] + 2)
+        (assoc :flags {:z (flag-z result)
+                       :s (flag-s result)
+                       :cy (flag-cy a d8)
+                       :p (flag-p result)
+                       :pad 0}))))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -1319,18 +1334,7 @@
         ;; #_=> nil
 
         0xc6
-        #_=> (let [a (:a cpu)
-                   d8 (nth memory (inc pc))
-                   result (+ a d8)]
-               (when debug (println "ADI" d8))
-               (recur (-> state
-                          (assoc-in [:cpu :a] (bit-and result 0xff))
-                          (update-in [:cpu :pc] + 2)
-                          (assoc :flags {:z (flag-z result)
-                                         :s (flag-s result)
-                                         :cy (flag-cy a d8)
-                                         :p (flag-p result)
-                                         :pad 0}))))
+        #_=> (recur (adi state))
 
         0xc8
         #_=> (recur (rz state))
