@@ -425,6 +425,18 @@
         (update-in [:cpu :pc] inc))))
 
 (defmulti dcx (fn [r _state] r))
+(defmethod dcx :sp
+  [_ state]
+  (let [result (-> state
+                   :cpu
+                   :sp
+                   dec 
+                   (bit-and 0xffff))]
+    (when debug (println "DCX SP"))
+    (-> state
+        (assoc-in [:cpu :sp] result)
+        (update-in [:cpu :pc] inc))))
+
 (defmethod dcx :default
   [r-msb state]
   (let [r16 (get-r16 r-msb state)
@@ -441,18 +453,6 @@
     (-> state
         (assoc-in [:cpu r-msb] r-msb')
         (assoc-in [:cpu r-lsb] r-lsb')
-        (update-in [:cpu :pc] inc))))
-
-(defmethod dcx :sp
-  [_ state]
-  (let [result (-> state
-                   :cpu
-                   :sp
-                   dec 
-                   (bit-and 0xffff))]
-    (when debug (println "DCX SP"))
-    (-> state
-        (assoc-in [:cpu :sp] result)
         (update-in [:cpu :pc] inc))))
 
 (defn shld [state]
