@@ -572,7 +572,8 @@
 (defmethod mov :to-m
   [_ r-src state]
   (let [adr (get-r16 :h state)]
-    (when debug (println (str "MOV M," (-> r-src name clojure.string/upper-case))))
+    (when debug (println "MOV" (str "M,"
+                                    (-> r-src name clojure.string/upper-case))))
     (-> state
         (assoc-in [:memory adr] (-> state :cpu r-src))
         (update-in [:cpu :pc] inc))))
@@ -580,9 +581,8 @@
 (defmethod mov :from-m
   [r-dst _ state]
   (let [adr (get-r16 :h state)]
-    (when debug (println (str "MOV "
-                              (-> r-dst name clojure.string/upper-case)
-                              ",M")))
+    (when debug (println "MOV" (str (-> r-dst name clojure.string/upper-case)
+                                    ",M")))
     (-> state
         (assoc-in [:cpu r-dst] (-> state :memory (nth adr)))
         (update-in [:cpu :pc] inc))))
@@ -590,10 +590,9 @@
 (defmethod mov :default
   [r-dst r-src state]
   (let []
-    (when debug (println (str "MOV "
-                              (-> r-dst name clojure.string/upper-case)
-                              ","
-                              (-> r-src name clojure.string/upper-case))))
+    (when debug (println "MOV" (str (-> r-dst name clojure.string/upper-case)
+                                    ","
+                                    (-> r-src name clojure.string/upper-case))))
     (-> state
         (assoc-in [:cpu r-dst] (-> state :cpu r-src))
         (update-in [:cpu :pc] inc))))
