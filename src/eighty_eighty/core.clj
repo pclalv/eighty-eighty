@@ -1265,7 +1265,7 @@
         #_=> (let [a (:a cpu)
                    d8 (nth memory (inc pc))
                    result (+ a d8)]
-               (when debug (println "ADI " d8))
+               (when debug (println "ADI" d8))
                (recur (-> state
                           (assoc-in [:cpu :a] (bit-and result 0xff))
                           (update-in [:cpu :pc] + 2)
