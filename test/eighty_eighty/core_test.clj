@@ -421,3 +421,40 @@
            (ora :b {:cpu {:a 2r00001111
                           :b 2r10100000
                           :pc 0}})))))
+
+(deftest cmp-test
+  (testing "return value"
+    ;; all examples taken from pg 20-21, 8080 Programmer's Manual
+    (is (= {:cpu {:a 0x0a
+                  :e 0x05
+                  :pc 1}
+            :flags {:z 0
+                    :s 0
+                    :p 1
+                    :cy 0
+                    :ac 1}}
+           (cmp :e {:cpu {:a 0x0a
+                          :e 0x05
+                          :pc 0}})))
+    (is (= {:cpu {:a 0x02
+                  :e 0x05
+                  :pc 1}
+            :flags {:z 0
+                    :s 1
+                    :p 0
+                    :cy 1
+                    :ac 0}}
+           (cmp :e {:cpu {:a 0x02
+                          :e 0x05
+                          :pc 0}})))
+    (is (= {:cpu {:a (two's-complement 27)
+                  :e 0x05
+                  :pc 1}
+            :flags {:z 0
+                    :s 1
+                    :p 0
+                    :cy 0
+                    :ac 1}}
+           (cmp :e {:cpu {:a (two's-complement 27)
+                          :e 0x05
+                          :pc 0}})))))

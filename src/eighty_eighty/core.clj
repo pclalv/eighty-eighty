@@ -647,7 +647,15 @@
                               ;; TODO: figure out if/how ac is affected
                               :cy 0})
         (update-in [:cpu :pc] inc))))
-        (update-in [:cpu :pc] inc))))
+
+(defn cmp [r state]
+  (let [a (get-r8 :a state)
+        v (get-r8 r state)]
+    (println "v" v)
+    (when debug (println "CMP" (-> r name clojure.string/upper-case)))
+    (-> (sub* v state)
+        ;; unlike subtraction operations, cmp does not affect a
+        (assoc-in [:cpu :a] a))))
 
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
@@ -1216,14 +1224,26 @@
         0xb8
         #_=> (recur (cmp :b state))
 
-        ;; 0xbb
-        ;; #_=> nil
+        0xb9
+        #_=> (recur (cmp :c state))
 
-        ;; 0xbc
-        ;; #_=> nil
+        0xba
+        #_=> (recur (cmp :d state))
 
-        ;; 0xbe
-        ;; #_=> nil
+        0xbb
+        #_=> (recur (cmp :e state))
+
+        0xbc
+        #_=> (recur (cmp :h state))
+
+        0xbd
+        #_=> (recur (cmp :l state))
+
+        0xbe
+        #_=> (recur (cmp :m state))
+
+        0xbf
+        #_=> (recur (cmp :a state))
 
         ;; 0xc0 nil
 
