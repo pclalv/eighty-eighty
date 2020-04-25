@@ -1295,6 +1295,9 @@
         ;; 0xca
         ;; #_=> nil
 
+        ;; 0xcb
+        ;; deliberately undefined
+
         ;; 0xcc
         ;; #_=> nil
 

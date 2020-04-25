@@ -458,3 +458,11 @@
            (cmp :e {:cpu {:a (two's-complement 27)
                           :e 0x05
                           :pc 0}})))))
+
+(deftest ret-test
+  (testing "return value"
+    (is (= {:cpu {:sp 3
+                  :pc 0x0403}
+            :memory [0x00 0x03 0x04]}
+           (ret {:cpu {:sp 0x01}
+                 :memory [0x00 0x03 0x04]})))))
