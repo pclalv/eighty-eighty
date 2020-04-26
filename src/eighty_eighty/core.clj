@@ -783,7 +783,6 @@
 
 (defn pop [r16 state]
   (let [sp (get-r16 :sp state)
-        memory (:memory state)
         d16-lsb (-> state :memory (nth sp))
         d16-msb (-> state :memory (nth (inc sp)))]
     (when debug (println "POP" (-> r16 name clojure.string/upper-case)))
