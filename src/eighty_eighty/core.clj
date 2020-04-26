@@ -890,6 +890,17 @@
     (call state :op "CPO")
     state))
 
+(defn push
+  [r16 state]
+  (let [sp (-> state :cpu :sp)
+        [msb lsb] (get-r16 r16 state :split? true)]
+    (when debug (println "PUSH" (-> r16 name clojure.string/upper-case)))
+    (-> state
+        (assoc-in [:memory (-> sp dec)] msb)
+        (assoc-in [:memory (-> sp dec dec)] lsb)
+        (update-in [:cpu :sp] - 2)
+        (update-in [:cpu :pc] inc))))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -1492,8 +1503,8 @@
         0xc4
         #_=> (recur (cnz state))
 
-        ;; 0xc5
-        ;; #_=> nil
+        0xc5
+        #_=> (recur (push :b state))
 
         0xc6
         #_=> (recur (adi state))
@@ -1531,8 +1542,8 @@
         0xd4
         #_=> (recur (cnc state))
 
-        ;; 0xd5
-        ;; #_=> nil
+        0xd5
+        #_=> (recur (push :d state))
 
         ;; 0xd4
         ;; #_=> nil
@@ -1570,8 +1581,8 @@
         0xe4
         #_=> (recur (cpo state))
 
-        ;; 0xe5
-        ;; #_=> nil
+        0xe5
+        #_=> (recur (push :h state))
 
         ;; 0xe6
         ;; #_=> nil
@@ -1605,8 +1616,8 @@
         0xf4
         #_=> (recur (cp state))
 
-        ;; 0xf5
-        ;; #_=> nil
+        0xf5
+        #_=> (recur (push :psw state))
 
         ;; 0xf6
         ;; #_=> nil

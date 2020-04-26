@@ -510,3 +510,37 @@
            (call {:cpu {:pc 0x0002
                         :sp 0x0007}
                   :memory [0x00 0x00 0xcd 0x34 0x12 0x00 0x00 0x00]})))))
+
+(deftest push-test
+  (testing "default"
+    (is (= {:cpu {:d 0x8f
+                  :e 0x9d
+                  :sp 0x0002
+                  :pc 1}
+            :memory [0x00 0x00 0x9d 0x8f 0x00]}
+           (push :d {:cpu {:d 0x8f
+                           :e 0x9d
+                           :sp 0x0004
+                           :pc 0}
+                     :memory [0x00 0x00 0x00 0x00 0x00]}))))
+  ;; is the fact that this has to be tested separately an indication
+  ;; that push should be a multimethod?
+  (testing "psw"
+    (is (= {:cpu {:a 0x1f
+                  :sp 2
+                  :pc 1},            
+            :flags {:z 1
+                    :s 0
+                    :p 1
+                    :cy 1
+                    :ac 0}
+             :memory [0 0 0x47 0x1f 0]}
+           (push :psw {:cpu {:a 0x1f
+                             :sp 0x0004
+                             :pc 0}
+                       :flags {:z 1 
+                               :s 0
+                               :p 1
+                               :cy 1
+                               :ac 0}
+                       :memory [0x00 0x00 0x00 0x00 0x00]})))))
