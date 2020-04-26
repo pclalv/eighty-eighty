@@ -660,13 +660,14 @@
         ;; unlike subtraction operations, cmp does not affect a
         (assoc-in [:cpu :a] a))))
 
-(defn ret [state]
+(defn ret [state & {op :op  :or {op "RET"}}]
   (let [sp (get-r16 :sp state)
         memory (:memory state)
         pc-lsb (-> state :memory (nth sp))
         pc-msb (-> state :memory (nth (inc sp)))
         pc' (+ (bit-shift-left pc-msb 8)
                pc-lsb)]
+    (when debug (println op))
     (-> state
         (assoc-in [:cpu :pc] pc')
         (update-in [:cpu :sp] + 2))))
@@ -681,7 +682,7 @@
 
 (defn rnc [state]
   (if (not (flag-c? state))
-    (ret state)
+    (ret state :op "RNC")
     state))
 
 (defn flag-z? [state]
@@ -689,32 +690,32 @@
 
 (defn rz [state]
   (if (flag-z? state)
-    (ret state)
+    (ret state :op "RZ")
     state))
 
 (defn rnz [state]
   (if (not (flag-z? state))
-    (ret state)
+    (ret state :op "RNZ")
     state))
 
 (defn rm [state]
   (if (= 1 (-> state :flags :s))
-    (ret state)
+    (ret state :op "RM")
     state))
 
 (defn rp [state]
   (if (= 0 (-> state :flags :s))
-    (ret state)
+    (ret state :op "RP")
     state))
 
 (defn rpe [state]
   (if (= 1 (-> state :flags :p))
-    (ret state)
+    (ret state :op "RPE")
     state))
 
 (defn rpo [state]
   (if (= 0 (-> state :flags :p))
-    (ret state)
+    (ret state :op "RPO")
     state))
 
 (defn adi [state]
