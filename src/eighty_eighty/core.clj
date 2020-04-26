@@ -774,6 +774,12 @@
         (update-in [:cpu :sp] + 2)
         (update-in [:cpu :pc] inc))))
 
+(defn jmp [state]
+  (let [pc' (get-d16-from-pc state)]
+    (when debug (println "JMP"))
+    (-> state
+        (assoc-in [:cpu :pc] pc'))))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -1370,8 +1376,8 @@
         ;; 0xc2
         ;; #_=> nil
 
-        ;; 0xc3
-        ;; #_=> nil
+        0xc3
+        #_=> (recur (jmp state))
 
         ;; 0xc4 nil
 

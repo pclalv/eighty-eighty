@@ -493,3 +493,10 @@
                                       (vec)
                                       (conj 0xc3 0xff))})
                (dissoc :memory))))))
+
+(deftest jmp-test
+  (testing "return value"
+    (is (= {:cpu {:pc 0x1234}
+            :memory [0xc3 0x34 0x12]}
+           (jmp {:cpu {:pc 0}
+                 :memory [0xc3 0x34 0x12]})))))
