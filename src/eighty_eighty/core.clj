@@ -665,7 +665,7 @@
         ;; unlike subtraction operations, cmp does not affect a
         (assoc-in [:cpu :a] a))))
 
-(defn ret [state & {op :op  :or {op "RET"}}]
+(defn ret [state & {op :op :or {op "RET"}}]
   (let [sp (get-r16 :sp state)
         memory (:memory state)
         pc-lsb (-> state :memory (nth sp))
