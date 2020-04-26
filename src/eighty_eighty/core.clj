@@ -1,5 +1,6 @@
 (ns eighty-eighty.core
-  (:gen-class))
+  (:gen-class)
+  (:require [clojure.math.numeric-tower :as math]))
 
 (def debug true)
 
@@ -43,21 +44,40 @@
 
 (defmulti get-r16 
   "Get a 16-bit register."
-  (fn [r-msb _state] r-msb))
+  (fn [r-msb _state & _opts] r-msb))
+
+(defmethod get-r16 :psw
+  [_ state & {split? :split?}]
+  (let [flags (:flags state)
+        msb (-> state :cpu :a)
+        lsb (+ (* (math/expt 2 7) (flags :s))
+               (* (math/expt 2 6) (flags :z))
+               (* (math/expt 2 4) (flags :ac))
+               (* (math/expt 2 2) (flags :p))
+               (* (math/expt 2 1))
+               (* (math/expt 2 0) (flags :cy)))]
+    (if split?
+      [msb lsb]
+      (-> lsb
+          (+ (bit-shift-left msb 8))
+          (bit-and 0xffff)))))
 
 (defmethod get-r16 :sp
-  [_ state]
-  (-> state :cpu :sp))
+  [_ state & {split? :split?}]
+  (if split?
+    (throw (Exception. "not implemented: (get-r16 :sp {...} :split? true)"))
+    (-> state :cpu :sp)))
 
 (defmethod get-r16 :default
-  [r-msb state]
+  [r-msb state & {split? :split?}]
   (let [r-lsb (get-r-lsb r-msb)
         {msb r-msb
-         lsb r-lsb} (:cpu state)
-        r16 (-> (+ (bit-shift-left msb 8)
-                   lsb)
-                (bit-and 0xffff))]
-    r16))
+         lsb r-lsb} (:cpu state)]
+    (if split?
+      [msb lsb]
+      (-> (+ (bit-shift-left msb 8)
+             lsb)
+          (bit-and 0xffff)))))
 
 (defmulti get-r8 (fn [r _state] r))
 
