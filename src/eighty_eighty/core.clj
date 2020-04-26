@@ -35,10 +35,11 @@
 
 (defn get-r-lsb [r-msb]
   (case r-msb
+    :a :f
     :b :c
     :d :e
     :h :l
-    (throw (Exception. (str "Unknown register: " (name r-msb))))))
+    (throw (Exception. (str "Unknown register: " r-msb)))))
 
 (defmulti get-r16 
   "Get a 16-bit register."
