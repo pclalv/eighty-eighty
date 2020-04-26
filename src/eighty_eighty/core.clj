@@ -926,6 +926,20 @@
         :op (str "RST " exp)
         :interrupt-handler-adr (* exp 0x08)))
 
+(defn out [state]
+  ;; FIXME
+  (let []
+    (when debug (println "OUT"))
+    (-> state
+        (update-in [:cpu :pc] + 2))))
+
+(defn in [state]
+  ;; FIXME
+  (let []
+    (when debug (println "IN"))
+    (-> state
+        (update-in [:cpu :pc] + 2))))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -1570,8 +1584,8 @@
         0xd2
         #_=> (recur (jnc state))
 
-        ;; 0xd3
-        ;; #_=> nil
+        0xd3
+        #_=> (recur (out state))
 
         0xd4
         #_=> (recur (cnc state))
@@ -1594,8 +1608,8 @@
         0xda
         #_=> (recur (jc state))
 
-        ;; 0xdb
-        ;; #_=> nil
+        0xdb
+        #_=> (recur (in state))
 
         0xdc
         #_=> (recur (cc state))
