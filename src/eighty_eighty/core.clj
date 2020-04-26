@@ -782,7 +782,7 @@
 
 (defn jc [state]
   (if (flag-c? state)
-    (jmp state)
+    (jmp state :op "JC")
     state))
 
 (defn jnc [state]
