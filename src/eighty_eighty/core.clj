@@ -4,10 +4,10 @@
 (def debug true)
 
 (def flags
-  ;; from pg 22 of 8080 Programmer's Manual:
-  ;; 7 6 5 4 3 2 1 0
-  ;;       a       c
-  ;; s z 0 c 0 p 1 y
+  "from pg 22 of 8080 Programmer's Manual:
+  7 6 5 4 3 2 1 0
+        a       c
+  s z 0 c 0 p 1 y"
   {:z 0
    :s 0
    :p 0
