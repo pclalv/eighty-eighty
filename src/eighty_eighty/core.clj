@@ -554,14 +554,19 @@
         (assoc-in [:memory adr] (-> state :cpu :a))
         (update-in [:cpu :pc] + 3))))
 
-(defn lda [state]
+(defn get-d16-from-pc
+  "returns the two bytes following PC in memory as a 16-bit integer"
+  [state]
   (let [pc (-> state :cpu :pc)
         memory (:memory state)
         adr-lsb (-> state :memory (nth (-> pc inc)))
-        adr-msb (-> state :memory (nth (-> pc inc inc)))
-        adr (+ (bit-shift-left adr-msb 8)
-               adr-lsb)
-        a' (nth memory adr)]
+        adr-msb (-> state :memory (nth (-> pc inc inc)))]
+    (+ (bit-shift-left adr-msb 8)
+       adr-lsb)))
+
+(defn lda [state]
+  (let [adr (get-d16-from-pc state)
+        a' (-> state :memory (nth adr))]
     (when debug (println "LDA" (format "%04x" adr)))
     (-> state
         (assoc-in [:cpu :a] a')
