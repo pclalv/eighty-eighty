@@ -921,6 +921,11 @@
         (update-in [:cpu :sp] - 2)
         (update-in [:cpu :pc] inc))))
 
+(defn rst [exp state]
+  (call state
+        :op (str "RST " exp)
+        :interrupt-handler-adr (* exp 0x08)))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -1529,6 +1534,9 @@
         0xc6
         #_=> (recur (adi state))
 
+        0xc7
+        #_=> (recur (rst 0 state))
+
         0xc8
         #_=> (recur (rz state))
 
@@ -1550,8 +1558,8 @@
         0xce
         #_=> (recur (aci state))
 
-        ;; 0xcf
-        ;; #_=> nil
+        0xcf
+        #_=> (recur (rst 1 state))
 
         0xd0
         #_=> (recur (rnc state))
@@ -1574,8 +1582,8 @@
         ;; 0xd6
         ;; #_=> nil
 
-        ;; 0xd7
-        ;; #_=> nil
+        0xd7
+        #_=> (recur (rst 2 state))
 
         0xd8
         #_=> (recur (rc state))
@@ -1598,8 +1606,8 @@
         ;; 0xde
         ;; #_=> nil
 
-        ;; 0xdf
-        ;; #_=> nil
+        0xdf
+        #_=> (recur (rst 3 state))
 
         0xe0
         #_=> (recur (rpo state))
@@ -1622,8 +1630,8 @@
         ;; 0xe6
         ;; #_=> nil
 
-        ;; 0xe7
-        ;; #_=> nil
+        0xe7
+        #_=> (recur (rst 4 state))
 
         0xe8
         #_=> (recur (rpe state))
@@ -1646,8 +1654,8 @@
         ;; 0xee
         ;; #_=> nil
 
-        ;; 0xef
-        ;; #_=> nil
+        0xef
+        #_=> (recur (rst 5 state))
 
         0xf0
         #_=> (recur (rp state))
@@ -1670,8 +1678,8 @@
         ;; 0xf6
         ;; #_=> nil
 
-        ;; 0xf7
-        ;; #_=> nil
+        0xf7
+        #_=> (recur (rst 6 state))
 
         0xf8
         #_=> (recur (rm state))
@@ -1694,8 +1702,8 @@
         ;; 0xfe
         ;; #_=> nil
 
-        ;; 0xff
-        ;; #_=> nil
+        0xff
+        #_=> (recur (rst 7 state))
 
         (throw (Exception. (str "unknown opcode: " (format "0x%x" opcode))))))))
 
