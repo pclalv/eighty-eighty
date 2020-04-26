@@ -796,6 +796,12 @@
     (-> state
         ;; this assoc-in-cpu-r16 thing is experimental. i just wanna
         ;; give it a shot to push the abstraction down a level.
+
+        ;; still, it seems necessary to test the :psw case specially,
+        ;; so maybe pop is best left as the multimethod.
+
+        ;; probably it'd've been best to implement :flags as the :f
+        ;; register, and use `bit-set` and `bit-clear` accordingly.
         (assoc-in-cpu-r16 r16 d16-msb d16-lsb)
         (update-in [:cpu :sp] + 2)
         (update-in [:cpu :pc] inc))))
