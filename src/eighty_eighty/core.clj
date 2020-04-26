@@ -743,20 +743,27 @@
     (ret state :op "RPO")
     state))
 
-(defn adi [state]
+(defn adi [state & {:keys [with-carry?]}]
   (let [{a :a
          pc :pc} (:cpu state)
+        carry-increment (if with-carry?
+                          (-> state :flags :cy)
+                          0)
         d8 (-> state :memory (nth (inc pc)))
-        result (+ a d8)]
+        result (+ a d8 carry-increment)]
     (when debug (println "ADI" d8))
     (-> state
         (assoc-in [:cpu :a] (bit-and result 0xff))
         (update-in [:cpu :pc] + 2)
         (assoc :flags {:z (flag-z result)
                        :s (flag-s result)
-                       :cy (flag-cy a d8)
+                       :cy (flag-cy a d8 carry-increment)
                        :p (flag-p result)
-                       :pad 0}))))
+                       :ac (flag-ac a d8 carry-increment)}))))
+
+(defn aci [state]
+  (adi state :with-carry? true))
+
 
 (defmulti assoc-in-cpu-r16 (fn [_ r16 _ _] r16))
 (defmethod assoc-in-cpu-r16 :psw
@@ -1526,6 +1533,9 @@
 
         0xcd
         #_=> (recur (call state))
+
+        0xce
+        #_=> (recur (aci state))
 
         0xd0
         #_=> (recur (rnc state))

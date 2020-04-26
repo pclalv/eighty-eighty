@@ -544,3 +544,55 @@
                                :cy 1
                                :ac 0}
                        :memory [0x00 0x00 0x00 0x00 0x00]})))))
+
+(deftest adi-test
+  (testing "return value"
+    (is (= {:cpu {:a 0x56
+                  :pc 2}
+            :memory [0xc6 0x42]
+            :flags {:z 0
+                    :s 0
+                    :cy 0
+                    :p 1
+                    :ac 0}}
+           (adi {:cpu {:a 0x14
+                       :pc 0}
+                 :memory [0xc6 0x42]})))
+    (is (= {:cpu {:a 0x14
+                  :pc 2}
+            :memory [0xc6 (two's-complement 0x42)]
+            :flags {:z 0
+                    :s 0
+                    :cy 1
+                    :p 1
+                    :ac 1}}
+           (adi {:cpu {:a 0x56
+                       :pc 0}
+                 :memory [0xc6 (two's-complement 0x42)]})))))
+
+(deftest aci-test
+  (testing "return value"
+    (is (= {:cpu {:a 0x14
+                  :pc 2}
+            :flags {:z 0
+                    :s 0
+                    :p 1
+                    :cy 1
+                    :ac 1}
+            :memory [0xc6 (two's-complement 0x42)]}
+           (aci {:cpu {:a 0x56
+                       :pc 0}
+                 :flags {:cy 0}
+                 :memory [0xc6 (two's-complement 0x42)]})))
+    (is (= {:cpu {:a 0x57
+                  :pc 2}
+            :flags {:z 0
+                    :s 0
+                    :p 0
+                    :cy 0
+                    :ac 0}
+            :memory [0xc6 0x42]}
+           (aci {:cpu {:a 0x14
+                       :pc 0}
+                 :flags {:cy 1}
+                 :memory [0xc6 0x42]})))))
