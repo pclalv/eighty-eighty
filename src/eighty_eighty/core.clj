@@ -1537,6 +1537,9 @@
         0xce
         #_=> (recur (aci state))
 
+        ;; 0xcf
+        ;; #_=> nil
+
         0xd0
         #_=> (recur (rnc state))
 
@@ -1555,14 +1558,17 @@
         0xd5
         #_=> (recur (push :d state))
 
-        ;; 0xd4
+        ;; 0xd6
         ;; #_=> nil
 
-        ;; 0xd6
+        ;; 0xd7
         ;; #_=> nil
 
         0xd8
         #_=> (recur (rc state))
+
+        ;; 0xd9
+        ;; deliberately undefined
 
         0xda
         #_=> (recur (jc state))
@@ -1573,7 +1579,13 @@
         0xdc
         #_=> (recur (cc state))
 
+        ;; 0xdd
+        ;; deliberately undefined
+
         ;; 0xde
+        ;; #_=> nil
+
+        ;; 0xdf
         ;; #_=> nil
 
         0xe0
@@ -1597,6 +1609,9 @@
         ;; 0xe6
         ;; #_=> nil
 
+        ;; 0xe7
+        ;; #_=> nil
+
         0xe8
         #_=> (recur (rpe state))
 
@@ -1606,12 +1621,19 @@
         0xea
         #_=> (recur (jpe state))
 
-        ;; 0xeb nil
+        ;; 0xeb
+        ;; #_=> nil
 
         0xec
         #_=> (recur (cpe state))
 
+        ;; 0xed
+        ;; deliberately undefined
+
         ;; 0xee
+        ;; #_=> nil
+
+        ;; 0xef
         ;; #_=> nil
 
         0xf0
@@ -1623,6 +1645,9 @@
         0xf2
         #_=> (recur (jp state))
 
+        ;; 0xf3
+        ;; #_=> nil
+
         0xf4
         #_=> (recur (cp state))
 
@@ -1632,8 +1657,14 @@
         ;; 0xf6
         ;; #_=> nil
 
+        ;; 0xf7
+        ;; #_=> nil
+
         0xf8
         #_=> (recur (rm state))
+
+        ;; 0xf9
+        ;; #_=> nil
 
         0xfa
         #_=> (recur (jm state))
@@ -1643,6 +1674,9 @@
 
         0xfc
         #_=> (recur (cm state))
+
+        ;; 0xfd
+        ;; deliberately undefined
 
         ;; 0xfe
         ;; #_=> nil
