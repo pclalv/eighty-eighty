@@ -466,3 +466,30 @@
             :memory [0x00 0x03 0x04]}
            (ret {:cpu {:sp 0x01}
                  :memory [0x00 0x03 0x04]})))))
+
+(deftest pop-test
+  (testing "default"
+    (is (= {:h 0x93
+            :l 0x3d
+            :pc 1
+            :sp 0x123b}
+           (:cpu (pop :h {:cpu {:sp 0x1239
+                                :pc 0}
+                          :memory (-> (repeat 0x1239 0)
+                                      (vec)
+                                      (conj 0x3d 0x93))})))))
+  (testing "psw"
+    (is (= {:cpu {:sp 0x2c02
+                  :pc 1
+                  :a 0xff},          
+            :flags {:s 1
+                    :z 1
+                    :ac 0
+                    :p 0
+                    :cy 1}}
+           (-> (pop :psw {:cpu {:sp 0x2c00
+                                :pc 0}
+                          :memory (-> (repeat 0x2c00 0)
+                                      (vec)
+                                      (conj 0xc3 0xff))})
+               (dissoc :memory))))))

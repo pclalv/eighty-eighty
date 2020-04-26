@@ -4,6 +4,10 @@
 (def debug true)
 
 (def flags
+  ;; from pg 22 of 8080 Programmer's Manual:
+  ;; 7 6 5 4 3 2 1 0
+  ;;       a       c
+  ;; s z 0 c 0 p 1 y
   {:z 0
    :s 0
    :p 0
@@ -727,6 +731,42 @@
                        :p (flag-p result)
                        :pad 0}))))
 
+(defmulti assoc-in-cpu-r16 (fn [_ r16 _ _] r16))
+(defmethod assoc-in-cpu-r16 :psw
+  [state _ d16-msb d16-lsb]
+  (let [s (if (bit-test d16-lsb 7) 1 0)
+        z (if (bit-test d16-lsb 6) 1 0)
+        ac (if (bit-test d16-lsb 4) 1 0)
+        p (if (bit-test d16-lsb 2) 1 0)
+        cy (if (bit-test d16-lsb 0) 1 0)]
+    (-> state
+        (assoc-in [:cpu :a] d16-msb)
+        (assoc :flags {:z z
+                       :s s
+                       :p p
+                       :cy cy
+                       :ac ac}))))
+
+(defmethod assoc-in-cpu-r16 :default
+  [state r-msb d16-msb d16-lsb]
+  (let [r-lsb (get-r-lsb r-msb)]
+    (-> state
+        (assoc-in [:cpu r-msb] d16-msb)
+        (assoc-in [:cpu r-lsb] d16-lsb))))
+
+(defn pop [r16 state]
+  (let [sp (get-r16 :sp state)
+        memory (:memory state)
+        d16-lsb (-> state :memory (nth sp))
+        d16-msb (-> state :memory (nth (inc sp)))]
+    (when debug (println "POP" (-> r16 name clojure.string/upper-case)))
+    (-> state
+        ;; this assoc-in-cpu-r16 thing is experimental. i just wanna
+        ;; give it a shot to push the abstraction down a level.
+        (assoc-in-cpu-r16 r16 d16-msb d16-lsb)
+        (update-in [:cpu :sp] + 2)
+        (update-in [:cpu :pc] inc))))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -1317,8 +1357,8 @@
         0xc0
         #_=> (recur (rnz state))
 
-        ;; 0xc1
-        ;; #_=> nil
+        0xc1
+        #_=> (recur (pop :b state))
 
         ;; 0xc2
         ;; #_=> nil
@@ -1355,8 +1395,8 @@
         0xd0
         #_=> (recur (rnc state))
 
-        ;; 0xd1
-        ;; #_=> nil
+        0xd1
+        #_=> (recur (pop :d state))
 
         ;; 0xd2
         ;; #_=> nil
@@ -1388,8 +1428,8 @@
         0xe0
         #_=> (recur (rpo state))
 
-        ;; 0xe1
-        ;; #_=> nil
+        0xe1
+        #_=> (recur (pop :h state))
 
         ;; 0xe2
         ;; #_=> nil
@@ -1420,8 +1460,8 @@
         0xf0
         #_=> (recur (rp state))
 
-        ;; 0xf1
-        ;; #_=> nil
+        0xf1
+        #_=> (recur (pop :psw state))
 
         ;; 0xf5
         ;; #_=> nil
