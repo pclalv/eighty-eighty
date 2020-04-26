@@ -750,8 +750,11 @@
                           (-> state :flags :cy)
                           0)
         d8 (-> state :memory (nth (inc pc)))
-        result (+ a d8 carry-increment)]
-    (when debug (println "ADI" d8))
+        result (+ a d8 carry-increment)
+        op (if with-carry?
+             "ACI"
+             "ADI")]
+    (when debug (println op d8))
     (-> state
         (assoc-in [:cpu :a] (bit-and result 0xff))
         (update-in [:cpu :pc] + 2)
