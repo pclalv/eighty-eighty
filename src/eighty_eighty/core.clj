@@ -820,6 +820,17 @@
     (jmp state :op "JPO")
     state))
 
+(defn call [state & {op :op :or {op "CALL"}}]
+  (let [sp (-> state :cpu :sp)
+        pc-lo-nybble (-> state :cpu :pc (bit-shift-right 8))
+        pc-hi-nybble (-> state :cpu :pc (bit-and 0xff))]
+    (when debug (println op))
+    (-> state
+        (assoc-in [:memory (-> sp dec)] pc-hi-nybble)
+        (assoc-in [:memory (-> sp dec dec)] pc-lo-nybble)
+        (assoc-in [:cpu :pc] (get-d16-from-pc state))
+        (update-in [:cpu :sp] + 2))))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -1442,8 +1453,8 @@
         ;; 0xcc
         ;; #_=> nil
 
-        ;; 0xcd
-        ;; #_=> nil
+        0xcd
+        #_=> (recur (call state))
 
         0xd0
         #_=> (recur (rnc state))
