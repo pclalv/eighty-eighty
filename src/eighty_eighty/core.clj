@@ -940,6 +940,18 @@
     (-> state
         (update-in [:cpu :pc] + 2))))
 
+(defn di [state]
+  (when debug (println "DI"))
+  (-> state
+      (assoc-in [:cpu :interrupt-enabled] false)
+      (update-in [:cpu :pc] inc)))
+
+(defn ei [state]
+  (when debug (println "EI"))
+  (-> state
+      (assoc-in [:cpu :interrupt-enabled] true)
+      (update-in [:cpu :pc] inc)))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -1680,8 +1692,8 @@
         0xf2
         #_=> (recur (jp state))
 
-        ;; 0xf3
-        ;; #_=> nil
+        0xf3
+        #_=> (recur (di state))
 
         0xf4
         #_=> (recur (cp state))
@@ -1704,8 +1716,8 @@
         0xfa
         #_=> (recur (jm state))
 
-        ;; 0xfb
-        ;; #_=> nil
+        0xfb
+        #_=> (recur (ei state))
 
         0xfc
         #_=> (recur (cm state))
