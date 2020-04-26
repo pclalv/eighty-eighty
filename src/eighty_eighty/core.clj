@@ -831,6 +831,46 @@
         (assoc-in [:cpu :pc] (get-d16-from-pc state))
         (update-in [:cpu :sp] + 2))))
 
+(defn cc [state]
+  (if (flag-c? state)
+    (call state :op "CC")
+    state))
+
+(defn cnc [state]
+  (if (not (flag-c? state))
+    (call state :op "CNC")
+    state))
+
+(defn cz [state]
+  (if (flag-z? state)
+    (call state :op "CZ")
+    state))
+
+(defn cnz [state]
+  (if (not (flag-z? state))
+    (call state :op "CNZ")
+    state))
+
+(defn cm [state]
+  (if (= 1 (-> state :flags :s))
+    (call state :op "CM")
+    state))
+
+(defn cp [state]
+  (if (= 0 (-> state :flags :s))
+    (call state :op "CP")
+    state))
+
+(defn cpe [state]
+  (if (= 1 (-> state :flags :p))
+    (call state :op "CPE")
+    state))
+
+(defn cpo [state]
+  (if (= 0 (-> state :flags :p))
+    (call state :op "CPO")
+    state))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -1430,7 +1470,8 @@
         0xc3
         #_=> (recur (jmp state))
 
-        ;; 0xc4 nil
+        0xc4
+        #_=> (recur (cnz state))
 
         ;; 0xc5
         ;; #_=> nil
@@ -1450,8 +1491,8 @@
         ;; 0xcb
         ;; deliberately undefined
 
-        ;; 0xcc
-        ;; #_=> nil
+        0xcc
+        #_=> (recur (cz state))
 
         0xcd
         #_=> (recur (call state))
@@ -1467,6 +1508,9 @@
 
         ;; 0xd3
         ;; #_=> nil
+
+        0xd4
+        #_=> (recur (cnc state))
 
         ;; 0xd5
         ;; #_=> nil
@@ -1486,6 +1530,9 @@
         ;; 0xdb
         ;; #_=> nil
 
+        0xdc
+        #_=> (recur (cc state))
+
         ;; 0xde
         ;; #_=> nil
 
@@ -1500,6 +1547,9 @@
 
         ;; 0xe3
         ;; #_=> nil
+
+        0xe4
+        #_=> (recur (cpo state))
 
         ;; 0xe5
         ;; #_=> nil
@@ -1518,8 +1568,8 @@
 
         ;; 0xeb nil
 
-        ;; 0xec
-        ;; #_=> nil
+        0xec
+        #_=> (recur (cpe state))
 
         ;; 0xee
         ;; #_=> nil
@@ -1532,6 +1582,9 @@
 
         0xf2
         #_=> (recur (jp state))
+
+        0xf4
+        #_=> (recur (cp state))
 
         ;; 0xf5
         ;; #_=> nil
@@ -1548,8 +1601,8 @@
         ;; 0xfb
         ;; #_=> nil
 
-        ;; 0xfc
-        ;; #_=> nil
+        0xfc
+        #_=> (recur (cm state))
 
         ;; 0xfe
         ;; #_=> nil
