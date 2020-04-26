@@ -846,10 +846,14 @@
     (jmp state :op "JPO")
     state))
 
-(defn call [state & {op :op :or {op "CALL"}}]
+(defn call [state & {:keys [op interrupt-handler-adr]
+                     :or {op "CALL"}}]
   (let [sp (-> state :cpu :sp)
-        pc-lo-nybble (-> state :cpu :pc (bit-shift-right 8))
-        pc-hi-nybble (-> state :cpu :pc (bit-and 0xff))]
+        adr (if interrupt-handler-adr
+              interrupt-handler-adr
+              (-> state :cpu :pc))
+        pc-lo-nybble (bit-shift-right adr 8)
+        pc-hi-nybble (bit-and adr 0xff)]
     (when debug (println op))
     (-> state
         (assoc-in [:memory (-> sp dec)] pc-hi-nybble)
