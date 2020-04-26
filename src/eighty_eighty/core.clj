@@ -774,11 +774,51 @@
         (update-in [:cpu :sp] + 2)
         (update-in [:cpu :pc] inc))))
 
-(defn jmp [state]
+(defn jmp [state & {op :op :or {op "JMP"}}]
   (let [pc' (get-d16-from-pc state)]
-    (when debug (println "JMP"))
+    (when debug (println op))
     (-> state
         (assoc-in [:cpu :pc] pc'))))
+
+(defn jc [state]
+  (if (flag-c? state)
+    (jmp state)
+    state))
+
+(defn jnc [state]
+  (if (not (flag-c? state))
+    (jmp state :op "JNC")
+    state))
+
+(defn jz [state]
+  (if (flag-z? state)
+    (jmp state :op "JZ")
+    state))
+
+(defn jnz [state]
+  (if (not (flag-z? state))
+    (jmp state :op "JNZ")
+    state))
+
+(defn jm [state]
+  (if (= 1 (-> state :flags :s))
+    (jmp state :op "JM")
+    state))
+
+(defn jp [state]
+  (if (= 0 (-> state :flags :s))
+    (jmp state :op "JP")
+    state))
+
+(defn jpe [state]
+  (if (= 1 (-> state :flags :p))
+    (jmp state :op "JPE")
+    state))
+
+(defn jpo [state]
+  (if (= 0 (-> state :flags :p))
+    (jmp state :op "JPO")
+    state))
 
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
@@ -1373,8 +1413,8 @@
         0xc1
         #_=> (recur (pop :b state))
 
-        ;; 0xc2
-        ;; #_=> nil
+        0xc2
+        #_=> (recur (jnz state))
 
         0xc3
         #_=> (recur (jmp state))
@@ -1393,8 +1433,8 @@
         0xc9
         #_=> (recur (ret state))
 
-        ;; 0xca
-        ;; #_=> nil
+        0xca
+        #_=> (recur (jz state))
 
         ;; 0xcb
         ;; deliberately undefined
@@ -1411,8 +1451,8 @@
         0xd1
         #_=> (recur (pop :d state))
 
-        ;; 0xd2
-        ;; #_=> nil
+        0xd2
+        #_=> (recur (jnc state))
 
         ;; 0xd3
         ;; #_=> nil
@@ -1429,8 +1469,8 @@
         0xd8
         #_=> (recur (rc state))
 
-        ;; 0xda
-        ;; #_=> nil
+        0xda
+        #_=> (recur (jc state))
 
         ;; 0xdb
         ;; #_=> nil
@@ -1444,8 +1484,8 @@
         0xe1
         #_=> (recur (pop :h state))
 
-        ;; 0xe2
-        ;; #_=> nil
+        0xe2
+        #_=> (recur (jpo state))
 
         ;; 0xe3
         ;; #_=> nil
@@ -1462,6 +1502,9 @@
         ;; 0xe9
         ;; #_=> nil
 
+        0xea
+        #_=> (recur (jpe state))
+
         ;; 0xeb nil
 
         ;; 0xec
@@ -1476,6 +1519,9 @@
         0xf1
         #_=> (recur (pop :psw state))
 
+        0xf2
+        #_=> (recur (jp state))
+
         ;; 0xf5
         ;; #_=> nil
 
@@ -1485,8 +1531,8 @@
         0xf8
         #_=> (recur (rm state))
 
-        ;; 0xfa
-        ;; #_=> nil
+        0xfa
+        #_=> (recur (jm state))
 
         ;; 0xfb
         ;; #_=> nil
