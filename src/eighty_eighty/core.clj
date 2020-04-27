@@ -627,27 +627,11 @@
         (assoc-in [:cpu r-dst] (-> state :cpu r-src))
         (update-in [:cpu :pc] inc))))
 
-(defn ana
-  [r state]
+(defn bitwise-a [state r bitwise-fn op]
   (let [a (get-r8 :a state)
         v (get-r8 r state)
-        result (bit-and a v)]
-    (when debug (println "ANA" (-> r name clojure.string/upper-case)))
-    (-> state
-        (assoc-in [:cpu :a] result)
-        (update :flags merge {:z (flag-z result)
-                              :s (flag-s result)
-                              :p (flag-p result)
-                              ;; TODO: figure out if/how ac is affected
-                              :cy 0})
-        (update-in [:cpu :pc] inc))))
-
-(defn xra
-  [r state]
-  (let [a (get-r8 :a state)
-        v (get-r8 r state)
-        result (bit-xor a v)]
-    (when debug (println "XRA" (-> r name clojure.string/upper-case)))
+        result (bitwise-fn a v)]
+    (when debug (println op (-> r name clojure.string/upper-case)))
     (-> state
         (assoc-in [:cpu :a] result)
         (update :flags merge {:z (flag-z result)
@@ -663,19 +647,14 @@
                               :cy 0})
         (update-in [:cpu :pc] inc))))
 
+(defn ana [r state]
+  (bitwise-a state r bit-and "ANA"))
+
+(defn xra [r state]
+  (bitwise-a state r bit-xor "XRA"))
+
 (defn ora [r state]
-  (let [a (get-r8 :a state)
-        v (get-r8 r state)
-        result (bit-or a v)]
-    (when debug (println "ORA" (-> r name clojure.string/upper-case)))
-    (-> state
-        (assoc-in [:cpu :a] result)
-        (update :flags merge {:z (flag-z result)
-                              :s (flag-s result)
-                              :p (flag-p result)
-                              ;; TODO: figure out if/how ac is affected
-                              :cy 0})
-        (update-in [:cpu :pc] inc))))
+  (bitwise-a state r bit-or "ORA"))
 
 (defn cmp [r state]
   (let [a (get-r8 :a state)
