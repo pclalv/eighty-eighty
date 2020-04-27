@@ -1037,13 +1037,13 @@
 (defn hlt []
   (println "HLT"))
 
-;; TODO: continue implementing arithmetic operations
-;; http://www.emulator101.com/arithmetic-group.html
 (defn nop [state]
   (when debug (println "NOP"))
   (-> state
       (update-in [:cpu :pc] inc)))
 
+;; TODO: test this function with Space Invaders
+;; > the program gets stuck in this infinite loop
 (defn emulate [memory & {:keys [debug]}]
   (loop [{memory :memory
           {:keys [pc] :as cpu} :cpu
