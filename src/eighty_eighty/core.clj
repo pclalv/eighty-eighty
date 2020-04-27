@@ -753,7 +753,14 @@
                           0)
         d8 (-> state :memory (nth (inc pc)))
         addends (if subtract?
-                  (map two's-complement [d8 carry-increment])
+                  ;; with subtraction, we must two's complement and
+                  ;; sum `d8` and `cy` _BEFORE_ the arithmetic
+                  ;; happens, so that we only pass its result and `a`
+                  ;; to any downstream add operations; if we were to
+                  ;; pass `a`, `d8` and `cy`, we'd get the wrong
+                  ;; result because `flag-cy`/`flag-ac` might see a
+                  ;; carry where there is none.
+                  [(apply + (map two's-complement [d8 carry-increment]))]
                   [d8 carry-increment])
         addends (conj addends a)
         result (apply + addends)
@@ -783,6 +790,13 @@
   ;; might be able to piggy-back off internals of adi much like
   ;; add/sub piggy-back off add*
   (adi* state :subtract? true))
+
+(defn sbi [state]
+  ;; might be able to piggy-back off internals of adi much like
+  ;; add/sub piggy-back off add*
+  (adi* state
+        :subtract? true
+        :with-carry? true))
 
 (defmulti assoc-in-cpu-r16 (fn [_ r16 _ _] r16))
 (defmethod assoc-in-cpu-r16 :psw
@@ -1645,8 +1659,8 @@
         ;; 0xdd
         ;; deliberately undefined
 
-        ;; 0xde
-        ;; #_=> nil
+        0xde
+        #_=> (recur (sbi state))
 
         0xdf
         #_=> (recur (rst 3 state))

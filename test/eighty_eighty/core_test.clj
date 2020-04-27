@@ -610,3 +610,30 @@
            (sui {:cpu {:a 0x00
                        :pc 0x00}
                  :memory [0xd6 0x01]})))))
+
+(deftest sbi-test
+  (testing "return value"
+    (is (= {:cpu {:a (two's-complement 0x02)
+                  :pc 2}
+            :memory  [0xde 0x01]
+            :flags {:z 0
+                    :s 1
+                    :p 0
+                    :cy 1
+                    :ac 0}}
+           (sbi {:cpu {:a 0x00
+                       :pc 0x00}
+                 :flags {:cy 1}
+                 :memory [0xde 0x01]})))
+    (is (= {:cpu {:a (two's-complement 0x01)
+                  :pc 2}
+            :memory  [0xde 0x01]
+            :flags {:z 0
+                    :s 1
+                    :p 1
+                    :cy 1
+                    :ac 0}}
+           (sbi {:cpu {:a 0x00
+                       :pc 0x00}
+                 :flags {:cy 0}
+                 :memory [0xde 0x01]})))))
