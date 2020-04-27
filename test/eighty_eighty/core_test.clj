@@ -721,3 +721,17 @@
            (sphl {:cpu {:h 0x50
                         :l 0x6c
                         :pc 0x00}})))))
+
+(deftest cpi-test
+  (testing "return value"
+    (is (= {:cpu {:a 0x4a
+                  :pc 0x02}
+            :flags {:z 0
+                    :s 0
+                    :p 1
+                    :cy 0
+                    :ac 0}
+            :memory [0xfe 0x40]}
+           (cpi {:cpu {:a 0x4a
+                       :pc 0x00}
+                 :memory [0xfe 0x40]})))))

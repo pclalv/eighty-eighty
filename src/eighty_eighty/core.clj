@@ -743,7 +743,7 @@
     (ret state :op "RPO")
     state))
 
-(defn adi* [state & {:keys [with-carry? subtract?]
+(defn adi* [state & {:keys [with-carry? subtract? op]
                      :or {with-carry? false
                           subtract? false}}]
   (let [{a :a
@@ -764,10 +764,12 @@
                   [d8 carry-increment])
         addends (conj addends a)
         result (apply + addends)
-        op (({true {true "SBI"
-                    false "SUI"}
-              false {true "ACI"
-                     false "ADI"}} subtract?) with-carry?)]
+        op (if op
+             op
+             (({true {true "SBI"
+                      false "SUI"}
+                false {true "ACI"
+                       false "ADI"}} subtract?) with-carry?))]
     (when debug (println op d8))
     (-> state
         (assoc-in [:cpu :a] (bit-and result 0xff))
@@ -797,6 +799,13 @@
   (adi* state
         :subtract? true
         :with-carry? true))
+
+(defn cpi [state]
+  (let [a (get-r8 :a state)]
+    (-> state
+        (adi* :subtract? true
+              :op "CPI")
+        (assoc-in [:cpu :a] a))))
 
 (defmulti assoc-in-cpu-r16 (fn [_ r16 _ _] r16))
 (defmethod assoc-in-cpu-r16 :psw
@@ -1788,8 +1797,8 @@
         ;; 0xfd
         ;; deliberately undefined
 
-        ;; 0xfe
-        ;; #_=> nil
+        0xfe
+        #_=> (recur (cpi state))
 
         0xff
         #_=> (recur (rst 7 state))
