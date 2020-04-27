@@ -283,7 +283,7 @@
         result (-> sp
                    inc
                    (bit-and 0xffff))]
-    (println "INX SP")
+    (when debug (println "INX SP"))
     (-> state
         (assoc-in [:cpu :sp] result)
         (update-in [:cpu :pc] inc))))
@@ -542,6 +542,7 @@
         (assoc-in [:flags :cy] (flag-cy high-nybble increment)))))
       
 (defn daa [state]
+  (when debug (println "DAA"))
   (-> state
       daa-0
       daa-1
