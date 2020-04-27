@@ -698,7 +698,9 @@
         ;; unlike subtraction operations, cmp does not affect a
         (assoc-in [:cpu :a] a))))
 
-(defn ret [state & {op :op :or {op "RET"}}]
+(defn ret [state & {:keys [op cond]
+                    :or {op "RET"
+                         cond true}}]
   (let [sp (get-r16 :sp state)
         memory (:memory state)
         pc-lsb (-> state :memory (nth sp))
@@ -706,55 +708,56 @@
         pc' (+ (bit-shift-left pc-msb 8)
                pc-lsb)]
     (when debug (println op))
-    (-> state
-        (assoc-in [:cpu :pc] pc')
-        (update-in [:cpu :sp] + 2))))
+    (if cond
+      (-> state
+          (assoc-in [:cpu :pc] pc')
+          (update-in [:cpu :sp] + 2))
+      (-> state
+          (update-in [:cpu :pc] inc)))))
 
 (defn flag-c? [state]
   (= 1 (-> state :flags :cy)))
 
-(defn rc [state]
-  (if (flag-c? state)
-    (ret state)
-    state))
-
-(defn rnc [state]
-  (if (not (flag-c? state))
-    (ret state :op "RNC")
-    state))
-
 (defn flag-z? [state]
   (= 1 (-> state :flags :z)))
 
+(defn rc [state]
+  (ret state
+       :op "RC"
+       :cond (flag-c? state)))
+
+(defn rnc [state]
+  (ret state
+       :op "RNC"
+       :cond (not (flag-c? state))))
+
 (defn rz [state]
-  (if (flag-z? state)
-    (ret state :op "RZ")
-    state))
+  (ret state
+       :op "RZ"
+       :cond (flag-z? state)))
 
 (defn rnz [state]
-  (if (not (flag-z? state))
-    (ret state :op "RNZ")
-    state))
+  (ret state
+       :op "RNZ"
+       :cond (not (flag-z? state))))
 
 (defn rm [state]
-  (if (= 1 (-> state :flags :s))
-    (ret state :op "RM")
-    state))
+  (ret state
+       :op "RM"
+       :cond (= 1 (-> state :flags :s))))
 
 (defn rp [state]
-  (if (= 0 (-> state :flags :s))
-    (ret state :op "RP")
-    state))
+  (ret state
+       :op "RP"
+       :cond (= 0 (-> state :flags :s))))
 
 (defn rpe [state]
-  (if (= 1 (-> state :flags :p))
-    (ret state :op "RPE")
-    state))
+  (ret state
+       :op "RPE"
+       :cond (= 1 (-> state :flags :p))))
 
 (defn rpo [state]
-  (if (= 0 (-> state :flags :p))
-    (ret state :op "RPO")
-    state))
+  (ret state :op "RPO" :cond (= 0 (-> state :flags :p))))
 
 (defn adi* [state & {:keys [with-carry? subtract? op]
                      :or {with-carry? false
