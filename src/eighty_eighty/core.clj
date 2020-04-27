@@ -911,8 +911,9 @@
 (defn jpo [state]
   (jmp state :op "JPO" :cond (= 0 (-> state :flags :p))))
 
-(defn call [state & {:keys [op interrupt-handler-adr]
-                     :or {op "CALL"}}]
+(defn call [state & {:keys [op cond interrupt-handler-adr]
+                     :or {op "CALL"
+                          cond true}}]
   (let [sp (-> state :cpu :sp)
         adr (if interrupt-handler-adr
               interrupt-handler-adr
@@ -920,51 +921,38 @@
         pc-lo-nybble (bit-shift-right adr 8)
         pc-hi-nybble (bit-and adr 0xff)]
     (when debug (println op (d16-str adr)))
-    (-> state
-        (assoc-in [:memory (-> sp dec)] pc-hi-nybble)
-        (assoc-in [:memory (-> sp dec dec)] pc-lo-nybble)
-        (assoc-in [:cpu :pc] (get-d16-from-pc state))
-        (update-in [:cpu :sp] + 2))))
+    (if cond
+      (-> state
+          (assoc-in [:memory (-> sp dec)] pc-hi-nybble)
+          (assoc-in [:memory (-> sp dec dec)] pc-lo-nybble)
+          (assoc-in [:cpu :pc] (get-d16-from-pc state))
+          (update-in [:cpu :sp] - 2))
+      (-> state
+          (update-in [:cpu :pc] + 3)))))
 
 (defn cc [state]
-  (if (flag-c? state)
-    (call state :op "CC")
-    state))
+  (call state :op "CC" :cond (flag-c? state)))
 
 (defn cnc [state]
-  (if (not (flag-c? state))
-    (call state :op "CNC")
-    state))
+  (call state :op "CNC" :cond (not (flag-c? state))))
 
 (defn cz [state]
-  (if (flag-z? state)
-    (call state :op "CZ")
-    state))
+  (call state :op "CZ" :cond (flag-z? state)))
 
 (defn cnz [state]
-  (if (not (flag-z? state))
-    (call state :op "CNZ")
-    state))
+  (call state :op "CNZ" :cond (not (flag-z? state))))
 
 (defn cm [state]
-  (if (= 1 (-> state :flags :s))
-    (call state :op "CM")
-    state))
+  (call state :op "CM" :cond (= 1 (-> state :flags :s))))
 
 (defn cp [state]
-  (if (= 0 (-> state :flags :s))
-    (call state :op "CP")
-    state))
+  (call state :op "CP" :cond (= 0 (-> state :flags :s))))
 
 (defn cpe [state]
-  (if (= 1 (-> state :flags :p))
-    (call state :op "CPE")
-    state))
+  (call state :op "CPE" :cond (= 1 (-> state :flags :p))))
 
 (defn cpo [state]
-  (if (= 0 (-> state :flags :p))
-    (call state :op "CPO")
-    state))
+  (call state :op "CPO" :cond (= 0 (-> state :flags :p))))
 
 (defn push
   [r16 state]
