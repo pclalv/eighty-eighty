@@ -596,3 +596,17 @@
                        :pc 0}
                  :flags {:cy 1}
                  :memory [0xc6 0x42]})))))
+
+(deftest sui-test
+  (testing "return value"
+    (is (= {:cpu {:a (two's-complement 0x01)
+                  :pc 0x02}
+            :flags {:z 0
+                    :s 1
+                    :p 1
+                    :cy 1
+                    :ac 0}
+            :memory [0xd6 0x01]}
+           (sui {:cpu {:a 0x00
+                       :pc 0x00}
+                 :memory [0xd6 0x01]})))))

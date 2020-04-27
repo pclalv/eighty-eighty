@@ -743,30 +743,46 @@
     (ret state :op "RPO")
     state))
 
-(defn adi [state & {:keys [with-carry?]}]
+(defn adi* [state & {:keys [with-carry? subtract?]
+                     :or {with-carry? false
+                          subtract? false}}]
   (let [{a :a
          pc :pc} (:cpu state)
         carry-increment (if with-carry?
                           (-> state :flags :cy)
                           0)
         d8 (-> state :memory (nth (inc pc)))
-        result (+ a d8 carry-increment)
-        op (if with-carry?
-             "ACI"
-             "ADI")]
+        addends (if subtract?
+                  (map two's-complement [d8 carry-increment])
+                  [d8 carry-increment])
+        addends (conj addends a)
+        result (apply + addends)
+        op (({true {true "SBI"
+                    false "SUI"}
+              false {true "ACI"
+                     false "ADI"}} subtract?) with-carry?)]
     (when debug (println op d8))
     (-> state
         (assoc-in [:cpu :a] (bit-and result 0xff))
         (update-in [:cpu :pc] + 2)
         (assoc :flags {:z (flag-z result)
                        :s (flag-s result)
-                       :cy (flag-cy a d8 carry-increment)
+                       :cy (if subtract?
+                             (bit-flip-lsb (apply flag-cy addends))
+                             (apply flag-cy addends))
                        :p (flag-p result)
-                       :ac (flag-ac a d8 carry-increment)}))))
+                       :ac (apply flag-ac addends)}))))
+
+(defn adi [state]
+  (adi* state))
 
 (defn aci [state]
-  (adi state :with-carry? true))
+  (adi* state :with-carry? true))
 
+(defn sui [state]
+  ;; might be able to piggy-back off internals of adi much like
+  ;; add/sub piggy-back off add*
+  (adi* state :subtract? true))
 
 (defmulti assoc-in-cpu-r16 (fn [_ r16 _ _] r16))
 (defmethod assoc-in-cpu-r16 :psw
@@ -1605,8 +1621,8 @@
         0xd5
         #_=> (recur (push :d state))
 
-        ;; 0xd6
-        ;; #_=> nil
+        0xd6
+        #_=> (recur (sui state))
 
         0xd7
         #_=> (recur (rst 2 state))
