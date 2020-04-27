@@ -711,3 +711,13 @@
                         :h 0x00
                         :l 0xff
                         :pc 0x00}})))))
+
+(deftest sphl-test
+  (testing "return value"
+    (is (= {:cpu {:h 0x50
+                  :l 0x6c
+                  :sp 0x506c
+                  :pc 0x01}}
+           (sphl {:cpu {:h 0x50
+                        :l 0x6c
+                        :pc 0x00}})))))

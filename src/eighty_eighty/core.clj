@@ -1008,6 +1008,13 @@
         (assoc-in [:cpu :d] (-> state :cpu :h))
         (update-in [:cpu :pc] inc))))
 
+(defn sphl [state]
+  (let [hl (get-r16 :h state)]
+    (when debug (println "SPHL"))
+    (-> state
+        (assoc-in [:cpu :sp] hl)
+        (update-in [:cpu :pc] inc))))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -1766,8 +1773,8 @@
         0xf8
         #_=> (recur (rm state))
 
-        ;; 0xf9
-        ;; #_=> nil
+        0xf9
+        #_=> (recur (sphl state))
 
         0xfa
         #_=> (recur (jm state))
