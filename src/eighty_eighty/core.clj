@@ -1038,6 +1038,11 @@
 
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
+(defn nop [state]
+  (when debug (println "NOP"))
+  (-> state
+      (update-in [:cpu :pc] inc)))
+
 (defn emulate [memory & {:keys [debug]}]
   (loop [{memory :memory
           {:keys [pc] :as cpu} :cpu
@@ -1046,7 +1051,7 @@
     (let [opcode (nth memory pc)]
       (case opcode
         0x00
-        #_=> (recur state)
+        #_=> (recur (nop state))
 
         0x01
         #_=> (recur (lxi :b state))
