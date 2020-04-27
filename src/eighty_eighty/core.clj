@@ -627,34 +627,47 @@
         (assoc-in [:cpu r-dst] (-> state :cpu r-src))
         (update-in [:cpu :pc] inc))))
 
-(defn bitwise-a [state r bitwise-fn op]
-  (let [a (get-r8 :a state)
-        v (get-r8 r state)
+(defn get-r8-from-pc [state]
+  (-> state
+      :memory
+      (nth (-> state :cpu :pc inc))))
+
+(defn bitwise-a [state bitwise-fn op & {r :register
+                                        immediate? :immediate?}]
+  (let [pc-increment (if immediate? 2 1)
+        a (get-r8 :a state)
+        v (cond r (get-r8 r state)
+                immediate? (get-r8-from-pc state)
+                :else (throw (Exception. "Must pass either :register or :immediate?")))
         result (bitwise-fn a v)]
-    (when debug (println op (-> r name clojure.string/upper-case)))
+    (when debug (if immediate?
+                  (println op (format "0x%02x" v))
+                  (println op (-> r name clojure.string/upper-case))))
     (-> state
         (assoc-in [:cpu :a] result)
         (update :flags merge {:z (flag-z result)
                               :s (flag-s result)
                               :p (flag-p result)
-                              ;; docs suggest that this affects the ac
-                              ;; flag but i'm gonna assume that's
-                              ;; wrong because nowhere does it say
-                              ;; _how_ ac is affected. it's possible
-                              ;; that an actual CPU would zero it out;
-                              ;; we'll see.
-                              ;; TODO: figure out if/how ac is affected
+                              ;; TODO: figure out if/how cy and ac are
+                              ;; affected. docs are unclear.
                               :cy 0})
-        (update-in [:cpu :pc] inc))))
+        (update-in [:cpu :pc] + pc-increment))))
 
 (defn ana [r state]
-  (bitwise-a state r bit-and "ANA"))
+  (bitwise-a state bit-and "ANA"
+             :register r))
 
 (defn xra [r state]
-  (bitwise-a state r bit-xor "XRA"))
+  (bitwise-a state bit-xor "XRA"
+             :register r))
 
 (defn ora [r state]
-  (bitwise-a state r bit-or "ORA"))
+  (bitwise-a state bit-or "ORA"
+             :register r))
+
+(defn ani [state]
+  (bitwise-a state bit-and "ANI"
+             :immediate? true))
 
 (defn cmp [r state]
   (let [a (get-r8 :a state)
@@ -1672,8 +1685,8 @@
         0xe5
         #_=> (recur (push :h state))
 
-        ;; 0xe6
-        ;; #_=> nil
+        0xe6
+        #_=> (recur (ani state))
 
         0xe7
         #_=> (recur (rst 4 state))

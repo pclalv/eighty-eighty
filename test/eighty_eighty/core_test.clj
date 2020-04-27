@@ -650,3 +650,16 @@
                         :sp 0x00
                         :pc 0x00}
                   :memory [0xf0 0x0d]})))))
+
+(deftest ani-test
+  (testing "return value"
+    (is (= {:cpu {:a 2r00001010
+                  :pc 2}
+            :flags {:z 0
+                    :s 0
+                    :p 1
+                    :cy 0}
+            :memory [0xe6 2r00001111]}
+           (ani {:cpu {:a 2r00111010
+                       :pc 0x00}
+                 :memory [0xe6 2r00001111]})))))
