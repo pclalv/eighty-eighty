@@ -1047,7 +1047,10 @@
   (loop [{memory :memory
           {:keys [pc] :as cpu} :cpu
           :as state} (-> initial-state
-                         (assoc :memory memory))]
+                         ;; extend memory so that it fills a 16-bit address space?
+                         (assoc :memory (->> (concat memory (repeat 0x00))
+                                             (take 0xffff)
+                                             vec)))]
     (let [opcode (nth memory pc)]
       (case opcode
         0x00
