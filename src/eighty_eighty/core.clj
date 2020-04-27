@@ -1024,6 +1024,9 @@
         (assoc-in [:cpu :sp] hl)
         (update-in [:cpu :pc] inc))))
 
+(defn hlt []
+  (println "HLT"))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -1389,8 +1392,8 @@
         0x75
         #_=> (recur (mov :m :l state))
 
-        ;; 0x76
-        ;; #_=> nil
+        0x76
+        #_=> (hlt)
 
         0x77
         #_=> (recur (mov :m :a state))
