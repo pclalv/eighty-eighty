@@ -669,6 +669,10 @@
   (bitwise-a state bit-and "ANI"
              :immediate? true))
 
+(defn xri [state]
+  (bitwise-a state bit-xor "XRI"
+             :immediate? true))
+
 (defn cmp [r state]
   (let [a (get-r8 :a state)
         v (get-r8 r state)]
@@ -1709,8 +1713,8 @@
         ;; 0xed
         ;; deliberately undefined
 
-        ;; 0xee
-        ;; #_=> nil
+        0xee
+        #_=> (recur (xri state))
 
         0xef
         #_=> (recur (rst 5 state))
