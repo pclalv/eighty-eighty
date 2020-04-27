@@ -637,3 +637,16 @@
                        :pc 0x00}
                  :flags {:cy 0}
                  :memory [0xde 0x01]})))))
+
+(deftest xthl-test
+  (testing "return value"
+    (is (= {:cpu {:h 0x0d
+                  :l 0xf0
+                  :sp 0x00
+                  :pc 0x01}
+            :memory [0x3c 0x0b]}
+           (xthl {:cpu {:h 0x0b
+                        :l 0x3c
+                        :sp 0x00
+                        :pc 0x00}
+                  :memory [0xf0 0x0d]})))))

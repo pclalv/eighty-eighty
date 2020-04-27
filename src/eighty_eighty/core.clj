@@ -982,6 +982,16 @@
       (assoc-in [:cpu :interrupt-enabled] true)
       (update-in [:cpu :pc] inc)))
 
+(defn xthl [state]
+  (let [sp (-> state :cpu :sp)]
+    (when debug (println "XTHL"))
+    (-> state
+        (assoc-in [:cpu :l] (-> state :memory (nth sp)))
+        (assoc-in [:cpu :h] (-> state :memory (nth (inc sp))))
+        (assoc-in [:memory sp] (-> state :cpu :l))
+        (assoc-in [:memory (inc sp)] (-> state :cpu :h))
+        (update-in [:cpu :pc] inc))))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -1674,8 +1684,8 @@
         0xe2
         #_=> (recur (jpo state))
 
-        ;; 0xe3
-        ;; #_=> nil
+        0xe3
+        #_=> (recur (xthl state))
 
         0xe4
         #_=> (recur (cpo state))
