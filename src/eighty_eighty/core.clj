@@ -872,7 +872,8 @@
     (if cond
       (-> state
           (assoc-in [:cpu :pc] pc'))
-      state)))
+      (-> state
+          (update-in [:cpu :pc] + 3)))))
 
 (defn jc [state]
   (jmp state
