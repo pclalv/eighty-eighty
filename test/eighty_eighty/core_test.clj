@@ -689,3 +689,12 @@
            (ori {:cpu {:a 2r10110101
                        :pc 0x00}
                  :memory [0xf6 2r00001111]})))))
+
+(deftest pchl-test
+  (testing "return value"
+    (is (= {:cpu {:h 0x41
+                  :l 0x3e
+                  :pc 0x413e}}
+           (pchl {:cpu {:h 0x41
+                        :l 0x3e
+                        :pc 0x00}})))))
