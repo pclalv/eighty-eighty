@@ -858,51 +858,51 @@
         (update-in [:cpu :sp] + 2)
         (update-in [:cpu :pc] inc))))
 
-(defn jmp [state & {op :op :or {op "JMP"}}]
+(defn jmp [state & {:keys [op cond]
+                    :or {op "JMP"
+                         cond true}}]
   (let [pc' (get-d16-from-pc state)]
     (when debug (println op (d16-str pc')))
-    (-> state
-        (assoc-in [:cpu :pc] pc'))))
+    (if cond
+      (-> state
+          (assoc-in [:cpu :pc] pc'))
+      state)))
 
 (defn jc [state]
-  (if (flag-c? state)
-    (jmp state :op "JC")
-    state))
+  (jmp state
+       :op "JC"
+       :cond (flag-c? state)))
 
 (defn jnc [state]
-  (if (not (flag-c? state))
-    (jmp state :op "JNC")
-    state))
+  (jmp state
+       :op "JNC"
+       :cond (not (flag-c? state))))
 
 (defn jz [state]
-  (if (flag-z? state)
-    (jmp state :op "JZ")
-    state))
+  (jmp state
+       :op "JZ"
+       :cond (flag-z? state)))
 
 (defn jnz [state]
-  (if (not (flag-z? state))
-    (jmp state :op "JNZ")
-    state))
+  (jmp state
+       :op "JNZ"
+       :cond (not (flag-z? state))))
 
 (defn jm [state]
-  (if (= 1 (-> state :flags :s))
-    (jmp state :op "JM")
-    state))
+  (jmp state
+       :op "JM"
+       :cond (= 1 (-> state :flags :s))))
 
 (defn jp [state]
-  (if (= 0 (-> state :flags :s))
-    (jmp state :op "JP")
-    state))
+  (jmp state
+       :op "JP"
+       :cond (= 0 (-> state :flags :s))))
 
 (defn jpe [state]
-  (if (= 1 (-> state :flags :p))
-    (jmp state :op "JPE")
-    state))
+  (jmp state :op "JPE" :cond (= 1 (-> state :flags :p))))
 
 (defn jpo [state]
-  (if (= 0 (-> state :flags :p))
-    (jmp state :op "JPO")
-    state))
+  (jmp state :op "JPO" :cond (= 0 (-> state :flags :p))))
 
 (defn call [state & {:keys [op interrupt-handler-adr]
                      :or {op "CALL"}}]
