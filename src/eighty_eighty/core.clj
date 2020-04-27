@@ -998,6 +998,16 @@
     (-> state
         (assoc-in [:cpu :pc] hl))))
 
+(defn xchg [state]
+  (let [sp (-> state :cpu :sp)]
+    (when debug (println "XCHG"))
+    (-> state
+        (assoc-in [:cpu :l] (-> state :cpu :e))
+        (assoc-in [:cpu :h] (-> state :cpu :d))
+        (assoc-in [:cpu :e] (-> state :cpu :l))
+        (assoc-in [:cpu :d] (-> state :cpu :h))
+        (update-in [:cpu :pc] inc))))
+
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
@@ -1714,8 +1724,8 @@
         0xea
         #_=> (recur (jpe state))
 
-        ;; 0xeb
-        ;; #_=> nil
+        0xeb
+        #_=> (recur (xchg state))
 
         0xec
         #_=> (recur (cpe state))

@@ -698,3 +698,16 @@
            (pchl {:cpu {:h 0x41
                         :l 0x3e
                         :pc 0x00}})))))
+
+(deftest xchg-test
+  (testing "return value"
+    (is (= {:cpu {:d 0x00
+                  :e 0xff
+                  :h 0x33
+                  :l 0x55
+                  :pc 0x01}}
+           (xchg {:cpu {:d 0x33
+                        :e 0x55
+                        :h 0x00
+                        :l 0xff
+                        :pc 0x00}})))))
