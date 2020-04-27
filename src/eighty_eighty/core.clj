@@ -673,6 +673,10 @@
   (bitwise-a state bit-xor "XRI"
              :immediate? true))
 
+(defn ori [state]
+  (bitwise-a state bit-or "ORI"
+             :immediate? true))
+
 (defn cmp [r state]
   (let [a (get-r8 :a state)
         v (get-r8 r state)]
@@ -1737,8 +1741,8 @@
         0xf5
         #_=> (recur (push :psw state))
 
-        ;; 0xf6
-        ;; #_=> nil
+        0xf6
+        #_=> (recur (ori state))
 
         0xf7
         #_=> (recur (rst 6 state))

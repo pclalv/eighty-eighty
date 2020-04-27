@@ -676,3 +676,16 @@
            (xri {:cpu {:a 2r00111011
                        :pc 0x00}
                  :memory [0xee 2r10000001]})))))
+
+(deftest ori-test
+  (testing "return value"
+    (is (= {:cpu {:a 2r10111111
+                  :pc 2}
+            :flags {:z 0
+                    :s 1
+                    :p 0
+                    :cy 0}
+            :memory [0xf6 2r00001111]}
+           (ori {:cpu {:a 2r10110101
+                       :pc 0x00}
+                 :memory [0xf6 2r00001111]})))))
