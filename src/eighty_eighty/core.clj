@@ -29,10 +29,17 @@
    :flags flags
    :interrupt-enabled true})
 
+;; debug output
+
+(defn d16-str [n]
+  (format "$%04x" n))
+
 (defn byte-str-with-padding
   "prints a string like 01010101"
   [i]
   (clojure.pprint/cl-format nil "~8'0b" i))
+
+;; getters
 
 (defn get-r-lsb [r-msb]
   (case r-msb
@@ -89,6 +96,16 @@
 (defmethod get-r8 :default
   [r state]
   (-> state :cpu r))
+
+(defn get-d16-from-pc
+  "returns the two bytes following PC in memory as a 16-bit integer"
+  [state]
+  (let [pc (-> state :cpu :pc)
+        memory (:memory state)
+        adr-lsb (-> state :memory (nth (-> pc inc)))
+        adr-msb (-> state :memory (nth (-> pc inc inc)))]
+    (+ (bit-shift-left adr-msb 8)
+       adr-lsb)))
 
 ;;;;;;;;;;;
 ;; flags ;;
@@ -154,6 +171,8 @@
     (if (> sum 0xf)
       1
       0)))
+
+;; ops
 
 (defn add* [v state & {with-carry :with-carry}]
   (let [addends (if with-carry
@@ -227,7 +246,7 @@
         msb (nth memory (+ 2 pc))
         d16 (+ (bit-shift-left msb 8)
                lsb)]
-    (when debug (println (str "LXI SP," (format "#$%x" d16))))
+    (when debug (println (str "LXI SP," (d16-str d16))))
     (-> state
         (assoc-in [:cpu :sp] (bit-and d16 0xffff))
         (update-in [:cpu :pc] + 3))))
@@ -243,7 +262,7 @@
                lsb)]
     (when debug (println "LXI" (str (-> r-msb name clojure.string/upper-case)
                                     ","
-                                    (format "#$%x" d16)))) 
+                                    (d16-str d16)))) 
     (-> state
         (assoc-in [:cpu r-msb] msb)
         (assoc-in [:cpu r-lsb] lsb)
@@ -574,16 +593,6 @@
         (assoc-in [:memory adr] (-> state :cpu :a))
         (update-in [:cpu :pc] + 3))))
 
-(defn get-d16-from-pc
-  "returns the two bytes following PC in memory as a 16-bit integer"
-  [state]
-  (let [pc (-> state :cpu :pc)
-        memory (:memory state)
-        adr-lsb (-> state :memory (nth (-> pc inc)))
-        adr-msb (-> state :memory (nth (-> pc inc inc)))]
-    (+ (bit-shift-left adr-msb 8)
-       adr-lsb)))
-
 (defn lda [state]
   (let [adr (get-d16-from-pc state)
         a' (-> state :memory (nth adr))]
@@ -850,7 +859,7 @@
 
 (defn jmp [state & {op :op :or {op "JMP"}}]
   (let [pc' (get-d16-from-pc state)]
-    (when debug (println op))
+    (when debug (println op (d16-str pc')))
     (-> state
         (assoc-in [:cpu :pc] pc'))))
 
@@ -902,7 +911,7 @@
               (-> state :cpu :pc))
         pc-lo-nybble (bit-shift-right adr 8)
         pc-hi-nybble (bit-and adr 0xff)]
-    (when debug (println op))
+    (when debug (println op (d16-str adr)))
     (-> state
         (assoc-in [:memory (-> sp dec)] pc-hi-nybble)
         (assoc-in [:memory (-> sp dec dec)] pc-lo-nybble)
