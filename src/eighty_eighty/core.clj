@@ -1030,9 +1030,7 @@
 ;; TODO: continue implementing arithmetic operations
 ;; http://www.emulator101.com/arithmetic-group.html
 (defn emulate [memory & {:keys [debug]}]
-  (loop [{flags :flags
-          interrupt-enabled :interrupt-enabled
-          memory :memory
+  (loop [{memory :memory
           {:keys [pc] :as cpu} :cpu
           :as state} (-> initial-state
                          (assoc :memory memory))]
