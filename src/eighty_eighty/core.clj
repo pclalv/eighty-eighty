@@ -34,6 +34,9 @@
 (defn d16-str [n]
   (format "$%04x" n))
 
+(defn d8-str [n]
+  (format "$%02x" n))
+
 (defn byte-str-with-padding
   "prints a string like 01010101"
   [i]
@@ -780,7 +783,7 @@
                       false "SUI"}
                 false {true "ACI"
                        false "ADI"}} subtract?) with-carry?))]
-    (when debug (println op d8))
+    (when debug (println op (d8-str d8)))
     (-> state
         (assoc-in [:cpu :a] (bit-and result 0xff))
         (update-in [:cpu :pc] + 2)
