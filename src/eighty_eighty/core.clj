@@ -360,7 +360,7 @@
         (update :flags merge {:z (flag-z result)
                               :s (flag-s result)
                               :p (flag-p result)
-                              :ac (flag-ac v -1)}))))
+                              :ac (flag-ac v (two's-complement 1))}))))
 
 (defmethod dcr :default
   [r state]
@@ -373,7 +373,7 @@
         (update :flags merge {:z (flag-z result)
                               :s (flag-s result)
                               :p (flag-p result)
-                              :ac (flag-ac v -1)}))))
+                              :ac (flag-ac v (two's-complement 1))}))))
 
 (defmulti mvi (fn [r _state] r))
 (defmethod mvi :m
