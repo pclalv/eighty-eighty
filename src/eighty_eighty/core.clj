@@ -913,18 +913,18 @@
 (defn call [state & {:keys [op cond interrupt-handler-adr]
                      :or {op "CALL"
                           cond true}}]
-  (let [sp (-> state :cpu :sp)
+  (let [{:keys [sp pc]} (:cpu state)
+        pc-lo-nybble (bit-shift-right pc 8)
+        pc-hi-nybble (bit-and pc 0xff)
         adr (if interrupt-handler-adr
               interrupt-handler-adr
-              (-> state :cpu :pc))
-        pc-lo-nybble (bit-shift-right adr 8)
-        pc-hi-nybble (bit-and adr 0xff)]
+              (get-d16-from-pc state))]
     (when debug (println op (d16-str adr)))
     (if cond
       (-> state
           (assoc-in [:memory (-> sp dec)] pc-hi-nybble)
           (assoc-in [:memory (-> sp dec dec)] pc-lo-nybble)
-          (assoc-in [:cpu :pc] (get-d16-from-pc state))
+          (assoc-in [:cpu :pc] adr)
           (update-in [:cpu :sp] - 2))
       (-> state
           (update-in [:cpu :pc] + 3)))))

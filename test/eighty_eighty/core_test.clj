@@ -504,7 +504,7 @@
 (deftest call-test
   (testing "return value"
     (is (= {:cpu {:pc 0x1234
-                  :sp 0x0009}
+                  :sp 0x0005}
             ;;                               pc-hi pc-lo
             :memory [0x00 0x00 0xcd 0x34 0x12 0x00 0x02 0x00]}
            (call {:cpu {:pc 0x0002
