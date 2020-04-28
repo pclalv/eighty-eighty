@@ -1048,788 +1048,791 @@
   (-> state
       (update-in [:cpu :pc] inc)))
 
+(defn emulate-step [state]
+  (let [{:keys [memory cpu]} state
+        pc (:pc cpu)
+        opcode (nth memory pc)]
+    (case opcode
+      0x00
+      #_=> (nop state)
+
+      0x01
+      #_=> (lxi :b state)
+
+      0x02
+      #_=> (stax :b state)
+
+      0x03
+      #_=> (inx :b state)
+
+      0x04
+      #_=> (inr :b state)
+
+      0x05
+      #_=> (dcr :b state)
+
+      0x06
+      #_=> (mvi :b state)
+
+      0x07
+      #_=> (rlc state)
+
+      ;; 0x08
+      ;; deliberately undefined
+
+      0x09
+      #_=> (dad :b state)
+
+      0x0a
+      #_=> (ldax :b state)
+
+      0x0b
+      #_=> (dcx :b state)
+
+      0x0c
+      #_=> (inr :c state)
+
+      0x0d
+      #_=> (dcr :c state)
+
+      0x0e
+      #_=> (mvi :c state)
+
+      0x0f
+      #_=> (rrc state)
+
+      ;; 0x10
+      ;; deliberately undefined
+
+      0x11
+      #_=> (lxi :d state)
+
+      0x12
+      #_=> (stax :d state)
+
+      0x13
+      #_=> (inx :d state)
+
+      0x14
+      #_=> (inr :d state)
+
+      0x15
+      #_=> (dcr :d state)
+
+      0x16
+      #_=> (mvi :d state)
+
+      0x17
+      #_=> (ral state)
+
+      ;; 0x18
+      ;; deliberately undefined
+
+      0x19
+      #_=> (dad :d state)
+
+      0x1a
+      #_=> (ldax :d state)
+
+      0x1b
+      #_=> (dcx :d state)
+
+      0x1c
+      #_=> (inr :e state)
+
+      0x1d
+      #_=> (dcr :e state)
+
+      0x1e
+      #_=> (mvi :e state)
+
+      0x1f
+      #_=> (rar state)
+
+      ;; 0x20 ;; RIM
+      ;; deliberately undefined
+
+      0x21
+      #_=> (lxi :h state)
+
+      0x22
+      #_=> (shld state)
+
+      0x23
+      #_=> (inx :h state)
+
+      0x24
+      #_=> (inr :h state)
+
+      0x25
+      #_=> (dcr :h state)
+
+      0x26
+      #_=> (mvi :h state)
+
+      0x27
+      #_=> (daa state)
+
+      ;; 0x28
+      ;; deliberately undefined
+
+      0x29
+      #_=> (dad :h state)
+
+      0x2a
+      #_=> (lhld state)
+
+      0x2b
+      #_=> (dcx :h state)
+
+      0x2c
+      #_=> (inr :l state)
+
+      0x2d
+      #_=> (dcr :l state)
+
+      0x2e
+      #_=> (mvi :l state)
+
+      0x2f
+      #_=> (cma state)
+
+      ;; 0x30 ;; SIM
+      ;; deliberately undefined
+
+      0x31
+      #_=> (lxi :sp state)
+
+      0x32
+      #_=> (sta state)
+
+      0x33
+      #_=> (inx :sp state)
+
+      0x34
+      #_=> (inr :m state)
+
+      0x35
+      #_=> (dcr :m state)
+
+      0x36
+      #_=> (mvi :m state)
+
+      0x37
+      #_=> (stc state)
+
+      ;; 0x38
+      ;; deliberately undefined
+
+      0x39
+      #_=> (dad :sp state)
+
+      0x3a
+      #_=> (lda state)
+
+      0x3b
+      #_=> (dcx :sp state)
+
+      0x3c
+      #_=> (inr :a state)
+
+      0x3d
+      #_=> (dcr :a state)
+
+      0x3e
+      #_=> (mvi :a state)
+
+      0x3f
+      #_=> (cmc state)
+
+      0x40
+      #_=> (mov :b :b state)
+
+      0x41
+      #_=> (mov :b :c state)
+
+      0x42
+      #_=> (mov :b :d state)
+
+      0x43
+      #_=> (mov :b :e state)
+
+      0x44
+      #_=> (mov :b :h state)
+
+      0x45
+      #_=> (mov :b :l state)
+
+      0x46
+      #_=> (mov :b :m state)
+
+      0x47
+      #_=> (mov :b :a state)
+
+      0x48
+      #_=> (mov :c :b state)
+
+      0x49
+      #_=> (mov :c :c state)
+
+      0x4a
+      #_=> (mov :c :d state)
+
+      0x4b
+      #_=> (mov :c :e state)
+
+      0x4c
+      #_=> (mov :c :h state)
+
+      0x4d
+      #_=> (mov :c :l state)
+
+      0x4e
+      #_=> (mov :c :m state)
+
+      0x4f
+      #_=> (mov :c :a state)
+
+      0x50
+      #_=> (mov :d :b state)
+
+      0x51
+      #_=> (mov :d :c state)
+
+      0x52
+      #_=> (mov :d :d state)
+
+      0x53
+      #_=> (mov :d :e state)
+
+      0x54
+      #_=> (mov :d :h state)
+
+      0x55
+      #_=> (mov :d :l state)
+
+      0x56
+      #_=> (mov :d :m state)
+
+      0x57
+      #_=> (mov :d :a state)
+
+      0x58
+      #_=> (mov :e :b state)
+
+      0x59
+      #_=> (mov :e :c state)
+
+      0x5a
+      #_=> (mov :e :d state)
+
+      0x5b
+      #_=> (mov :e :e state)
+
+      0x5c
+      #_=> (mov :e :h state)
+
+      0x5d
+      #_=> (mov :e :l state)
+
+      0x5e
+      #_=> (mov :e :m state)
+
+      0x5f
+      #_=> (mov :e :a state)
+
+      0x60
+      #_=> (mov :h :b state)
+
+      0x61
+      #_=> (mov :h :c state)
+
+      0x62
+      #_=> (mov :h :d state)
+
+      0x63
+      #_=> (mov :h :e state)
+
+      0x64
+      #_=> (mov :h :h state)
+
+      0x65
+      #_=> (mov :h :l state)
+
+      0x66
+      #_=> (mov :h :m state)
+
+      0x67
+      #_=> (mov :h :a state)
+
+      0x68
+      #_=> (mov :l :b state)
+
+      0x69
+      #_=> (mov :l :c state)
+
+      0x6a
+      #_=> (mov :l :d state)
+
+      0x6b
+      #_=> (mov :l :e state)
+
+      0x6c
+      #_=> (mov :l :h state)
+
+      0x6d
+      #_=> (mov :l :l state)
+
+      0x6e
+      #_=> (mov :l :m state)
+
+      0x6f
+      #_=> (mov :l :a state)
+
+      0x70
+      #_=> (mov :m :b state)
+
+      0x71
+      #_=> (mov :m :c state)
+
+      0x72
+      #_=> (mov :m :d state)
+
+      0x73
+      #_=> (mov :m :e state)
+
+      0x74
+      #_=> (mov :m :h state)
+
+      0x75
+      #_=> (mov :m :l state)
+
+      0x76
+      #_=> (hlt)
+
+      0x77
+      #_=> (mov :m :a state)
+
+      0x78
+      #_=> (mov :a :b state)
+
+      0x79
+      #_=> (mov :a :c state)
+
+      0x7a
+      #_=> (mov :a :d state)
+
+      0x7b
+      #_=> (mov :a :e state)
+
+      0x7c
+      #_=> (mov :a :h state)
+
+      0x7d
+      #_=> (mov :a :l state)
+
+      0x7e
+      #_=> (mov :a :m state)
+
+      0x7f
+      #_=> (mov :a :a state)
+
+      0x80
+      #_=> (add :b state)
+
+      0x81
+      #_=> (add :c state)
+
+      0x82
+      #_=> (add :d state)
+
+      0x83
+      #_=> (add :e state)
+
+      0x84
+      #_=> (add :h state)
+
+      0x85
+      #_=> (add :l state)
+
+      0x86
+      #_=> (add :m state)
+
+      0x87
+      #_=> (add :a state)
+
+      0x88
+      #_=> (adc :b state)
+
+      0x89
+      #_=> (adc :c state)
+
+      0x8a
+      #_=> (adc :d state)
+
+      0x8b
+      #_=> (adc :e state)
+
+      0x8c
+      #_=> (adc :h state)
+
+      0x8d
+      #_=> (adc :l state)
+
+      0x8e
+      #_=> (adc :m state)
+
+      0x8f
+      #_=> (adc :a state)
+
+      0x90
+      #_=> (sub :b state)
+
+      0x91
+      #_=> (sub :c state)
+
+      0x92
+      #_=> (sub :d state)
+
+      0x93
+      #_=> (sub :e state)
+
+      0x94
+      #_=> (sub :h state)
+
+      0x95
+      #_=> (sub :l state)
+
+      0x96
+      #_=> (sub :m state)
+
+      0x97
+      #_=> (sub :a state)
+
+      0x98
+      #_=> (sbb :b state)
+
+      0x99
+      #_=> (sbb :c state)
+
+      0x9a
+      #_=> (sbb :d state)
+
+      0x9b
+      #_=> (sbb :e state)
+
+      0x9c
+      #_=> (sbb :h state)
+
+      0x9d
+      #_=> (sbb :l state)
+
+      0x9e
+      #_=> (sbb :m state)
+
+      0x9f
+      #_=> (sbb :a state)
+
+      0xa0
+      #_=> (ana :b state)
+
+      0xa1
+      #_=> (ana :c state)
+
+      0xa2
+      #_=> (ana :d state)
+
+      0xa3
+      #_=> (ana :e state)
+
+      0xa4
+      #_=> (ana :h state)
+
+      0xa5
+      #_=> (ana :l state)
+
+      0xa6
+      #_=> (ana :m state)
+
+      0xa7
+      #_=> (ana :a state)
+
+      0xa8
+      #_=> (xra :b state)
+
+      0xa9
+      #_=> (xra :c state)
+
+      0xaa
+      #_=> (xra :d state)
+
+      0xab
+      #_=> (xra :e state)
+
+      0xac
+      #_=> (xra :h state)
+
+      0xad
+      #_=> (xra :l state)
+
+      0xae
+      #_=> (xra :m state)
+
+      0xaf
+      #_=> (xra :a state)
+
+      0xb0
+      #_=> (ora :b state)
+
+      0xb1
+      #_=> (ora :c state)
+
+      0xb2
+      #_=> (ora :d state)
+
+      0xb3
+      #_=> (ora :e state)
+
+      0xb4
+      #_=> (ora :h state)
+
+      0xb5
+      #_=> (ora :l state)
+
+      0xb6
+      #_=> (ora :m state)
+
+      0xb7
+      #_=> (ora :a state)
+
+      0xb8
+      #_=> (cmp :b state)
+
+      0xb9
+      #_=> (cmp :c state)
+
+      0xba
+      #_=> (cmp :d state)
+
+      0xbb
+      #_=> (cmp :e state)
+
+      0xbc
+      #_=> (cmp :h state)
+
+      0xbd
+      #_=> (cmp :l state)
+
+      0xbe
+      #_=> (cmp :m state)
+
+      0xbf
+      #_=> (cmp :a state)
+
+      0xc0
+      #_=> (rnz state)
+
+      0xc1
+      #_=> (pop :b state)
+
+      0xc2
+      #_=> (jnz state)
+
+      0xc3
+      #_=> (jmp state)
+
+      0xc4
+      #_=> (cnz state)
+
+      0xc5
+      #_=> (push :b state)
+
+      0xc6
+      #_=> (adi state)
+
+      0xc7
+      #_=> (rst 0 state)
+
+      0xc8
+      #_=> (rz state)
+
+      0xc9
+      #_=> (ret state)
+
+      0xca
+      #_=> (jz state)
+
+      ;; 0xcb
+      ;; deliberately undefined
+
+      0xcc
+      #_=> (cz state)
+
+      0xcd
+      #_=> (call state)
+
+      0xce
+      #_=> (aci state)
+
+      0xcf
+      #_=> (rst 1 state)
+
+      0xd0
+      #_=> (rnc state)
+
+      0xd1
+      #_=> (pop :d state)
+
+      0xd2
+      #_=> (jnc state)
+
+      0xd3
+      #_=> (out state)
+
+      0xd4
+      #_=> (cnc state)
+
+      0xd5
+      #_=> (push :d state)
+
+      0xd6
+      #_=> (sui state)
+
+      0xd7
+      #_=> (rst 2 state)
+
+      0xd8
+      #_=> (rc state)
+
+      ;; 0xd9
+      ;; deliberately undefined
+
+      0xda
+      #_=> (jc state)
+
+      0xdb
+      #_=> (in state)
+
+      0xdc
+      #_=> (cc state)
+
+      ;; 0xdd
+      ;; deliberately undefined
+
+      0xde
+      #_=> (sbi state)
+
+      0xdf
+      #_=> (rst 3 state)
+
+      0xe0
+      #_=> (rpo state)
+
+      0xe1
+      #_=> (pop :h state)
+
+      0xe2
+      #_=> (jpo state)
+
+      0xe3
+      #_=> (xthl state)
+
+      0xe4
+      #_=> (cpo state)
+
+      0xe5
+      #_=> (push :h state)
+
+      0xe6
+      #_=> (ani state)
+
+      0xe7
+      #_=> (rst 4 state)
+
+      0xe8
+      #_=> (rpe state)
+
+      0xe9
+      #_=> (pchl state)
+
+      0xea
+      #_=> (jpe state)
+
+      0xeb
+      #_=> (xchg state)
+
+      0xec
+      #_=> (cpe state)
+
+      ;; 0xed
+      ;; deliberately undefined
+
+      0xee
+      #_=> (xri state)
+
+      0xef
+      #_=> (rst 5 state)
+
+      0xf0
+      #_=> (rp state)
+
+      0xf1
+      #_=> (pop :psw state)
+
+      0xf2
+      #_=> (jp state)
+
+      0xf3
+      #_=> (di state)
+
+      0xf4
+      #_=> (cp state)
+
+      0xf5
+      #_=> (push :psw state)
+
+      0xf6
+      #_=> (ori state)
+
+      0xf7
+      #_=> (rst 6 state)
+
+      0xf8
+      #_=> (rm state)
+
+      0xf9
+      #_=> (sphl state)
+
+      0xfa
+      #_=> (jm state)
+
+      0xfb
+      #_=> (ei state)
+
+      0xfc
+      #_=> (cm state)
+
+      ;; 0xfd
+      ;; deliberately undefined
+
+      0xfe
+      #_=> (cpi state)
+
+      0xff
+      #_=> (rst 7 state)
+
+      (throw (Exception. (str "unknown opcode: " (format "0x%x" opcode)))))))
+
 ;; TODO: test this function with Space Invaders
 ;; > the program gets stuck in this infinite loop
 (defn emulate [memory & {:keys [debug]}]
-  (loop [{memory :memory
-          {:keys [pc] :as cpu} :cpu
-          :as state} (-> initial-state
-                         ;; extend memory so that it fills a 16-bit address space?
-                         (assoc :memory (->> (concat memory (repeat 0x00))
-                                             (take 0xffff)
-                                             vec)))]
-    (inspect-state state)
-    (let [opcode (nth memory pc)]
-      (case opcode
-        0x00
-        #_=> (recur (nop state))
-
-        0x01
-        #_=> (recur (lxi :b state))
-
-        0x02
-        #_=> (recur (stax :b state))
-
-        0x03
-        #_=> (recur (inx :b state))
-
-        0x04
-        #_=> (recur (inr :b state))
-
-        0x05
-        #_=> (recur (dcr :b state))
-
-        0x06
-        #_=> (recur (mvi :b state))
-
-        0x07
-        #_=> (recur (rlc state))
-
-        ;; 0x08
-        ;; deliberately undefined
-
-        0x09
-        #_=> (recur (dad :b state))
-
-        0x0a
-        #_=> (recur (ldax :b state))
-
-        0x0b
-        #_=> (recur (dcx :b state))
-
-        0x0c
-        #_=> (recur (inr :c state))
-
-        0x0d
-        #_=> (recur (dcr :c state))
-
-        0x0e
-        #_=> (recur (mvi :c state))
-
-        0x0f
-        #_=> (recur (rrc state))
-
-        ;; 0x10
-        ;; deliberately undefined
-
-        0x11
-        #_=> (recur (lxi :d state))
-
-        0x12
-        #_=> (recur (stax :d state))
-
-        0x13
-        #_=> (recur (inx :d state))
-
-        0x14
-        #_=> (recur (inr :d state))
-
-        0x15
-        #_=> (recur (dcr :d state))
-
-        0x16
-        #_=> (recur (mvi :d state))
-
-        0x17
-        #_=> (recur (ral state))
-
-        ;; 0x18
-        ;; deliberately undefined
-
-        0x19
-        #_=> (recur (dad :d state))
-
-        0x1a
-        #_=> (recur (ldax :d state))
-
-        0x1b
-        #_=> (recur (dcx :d state))
-
-        0x1c
-        #_=> (recur (inr :e state))
-
-        0x1d
-        #_=> (recur (dcr :e state))
-
-        0x1e
-        #_=> (recur (mvi :e state))
-
-        0x1f
-        #_=> (recur (rar state))
-
-        ;; 0x20 ;; RIM
-        ;; deliberately undefined
-
-        0x21
-        #_=> (recur (lxi :h state))
-
-        0x22
-        #_=> (recur (shld state))
-
-        0x23
-        #_=> (recur (inx :h state))
-
-        0x24
-        #_=> (recur (inr :h state))
-
-        0x25
-        #_=> (recur (dcr :h state))
-
-        0x26
-        #_=> (recur (mvi :h state))
-
-        0x27
-        #_=> (recur (daa state))
-
-        ;; 0x28
-        ;; deliberately undefined
-
-        0x29
-        #_=> (recur (dad :h state))
-
-        0x2a
-        #_=> (recur (lhld state))
-
-        0x2b
-        #_=> (recur (dcx :h state))
-
-        0x2c
-        #_=> (recur (inr :l state))
-
-        0x2d
-        #_=> (recur (dcr :l state))
-
-        0x2e
-        #_=> (recur (mvi :l state))
-
-        0x2f
-        #_=> (recur (cma state))
-
-        ;; 0x30 ;; SIM
-        ;; deliberately undefined
-
-        0x31
-        #_=> (recur (lxi :sp state))
-
-        0x32
-        #_=> (recur (sta state))
-
-        0x33
-        #_=> (recur (inx :sp state))
-
-        0x34
-        #_=> (recur (inr :m state))
-
-        0x35
-        #_=> (recur (dcr :m state))
-
-        0x36
-        #_=> (recur (mvi :m state))
-
-        0x37
-        #_=> (recur (stc state))
-
-        ;; 0x38
-        ;; deliberately undefined
-
-        0x39
-        #_=> (recur (dad :sp state))
-
-        0x3a
-        #_=> (recur (lda state))
-
-        0x3b
-        #_=> (recur (dcx :sp state))
-
-        0x3c
-        #_=> (recur (inr :a state))
-
-        0x3d
-        #_=> (recur (dcr :a state))
-
-        0x3e
-        #_=> (recur (mvi :a state))
-
-        0x3f
-        #_=> (recur (cmc state))
-
-        0x40
-        #_=> (recur (mov :b :b state))
-
-        0x41
-        #_=> (recur (mov :b :c state))
-
-        0x42
-        #_=> (recur (mov :b :d state))
-
-        0x43
-        #_=> (recur (mov :b :e state))
-
-        0x44
-        #_=> (recur (mov :b :h state))
-
-        0x45
-        #_=> (recur (mov :b :l state))
-
-        0x46
-        #_=> (recur (mov :b :m state))
-
-        0x47
-        #_=> (recur (mov :b :a state))
-
-        0x48
-        #_=> (recur (mov :c :b state))
-
-        0x49
-        #_=> (recur (mov :c :c state))
-
-        0x4a
-        #_=> (recur (mov :c :d state))
-
-        0x4b
-        #_=> (recur (mov :c :e state))
-
-        0x4c
-        #_=> (recur (mov :c :h state))
-
-        0x4d
-        #_=> (recur (mov :c :l state))
-
-        0x4e
-        #_=> (recur (mov :c :m state))
-
-        0x4f
-        #_=> (recur (mov :c :a state))
-
-        0x50
-        #_=> (recur (mov :d :b state))
-
-        0x51
-        #_=> (recur (mov :d :c state))
-
-        0x52
-        #_=> (recur (mov :d :d state))
-
-        0x53
-        #_=> (recur (mov :d :e state))
-
-        0x54
-        #_=> (recur (mov :d :h state))
-
-        0x55
-        #_=> (recur (mov :d :l state))
-
-        0x56
-        #_=> (recur (mov :d :m state))
-
-        0x57
-        #_=> (recur (mov :d :a state))
-
-        0x58
-        #_=> (recur (mov :e :b state))
-
-        0x59
-        #_=> (recur (mov :e :c state))
-
-        0x5a
-        #_=> (recur (mov :e :d state))
-
-        0x5b
-        #_=> (recur (mov :e :e state))
-
-        0x5c
-        #_=> (recur (mov :e :h state))
-
-        0x5d
-        #_=> (recur (mov :e :l state))
-
-        0x5e
-        #_=> (recur (mov :e :m state))
-
-        0x5f
-        #_=> (recur (mov :e :a state))
-
-        0x60
-        #_=> (recur (mov :h :b state))
-
-        0x61
-        #_=> (recur (mov :h :c state))
-
-        0x62
-        #_=> (recur (mov :h :d state))
-
-        0x63
-        #_=> (recur (mov :h :e state))
-
-        0x64
-        #_=> (recur (mov :h :h state))
-
-        0x65
-        #_=> (recur (mov :h :l state))
-
-        0x66
-        #_=> (recur (mov :h :m state))
-
-        0x67
-        #_=> (recur (mov :h :a state))
-
-        0x68
-        #_=> (recur (mov :l :b state))
-
-        0x69
-        #_=> (recur (mov :l :c state))
-
-        0x6a
-        #_=> (recur (mov :l :d state))
-
-        0x6b
-        #_=> (recur (mov :l :e state))
-
-        0x6c
-        #_=> (recur (mov :l :h state))
-
-        0x6d
-        #_=> (recur (mov :l :l state))
-
-        0x6e
-        #_=> (recur (mov :l :m state))
-
-        0x6f
-        #_=> (recur (mov :l :a state))
-
-        0x70
-        #_=> (recur (mov :m :b state))
-
-        0x71
-        #_=> (recur (mov :m :c state))
-
-        0x72
-        #_=> (recur (mov :m :d state))
-
-        0x73
-        #_=> (recur (mov :m :e state))
-
-        0x74
-        #_=> (recur (mov :m :h state))
-
-        0x75
-        #_=> (recur (mov :m :l state))
-
-        0x76
-        #_=> (hlt)
-
-        0x77
-        #_=> (recur (mov :m :a state))
-
-        0x78
-        #_=> (recur (mov :a :b state))
-
-        0x79
-        #_=> (recur (mov :a :c state))
-
-        0x7a
-        #_=> (recur (mov :a :d state))
-
-        0x7b
-        #_=> (recur (mov :a :e state))
-
-        0x7c
-        #_=> (recur (mov :a :h state))
-
-        0x7d
-        #_=> (recur (mov :a :l state))
-
-        0x7e
-        #_=> (recur (mov :a :m state))
-
-        0x7f
-        #_=> (recur (mov :a :a state))
-
-        0x80
-        #_=> (recur (add :b state))
-
-        0x81
-        #_=> (recur (add :c state))
-
-        0x82
-        #_=> (recur (add :d state))
-
-        0x83
-        #_=> (recur (add :e state))
-
-        0x84
-        #_=> (recur (add :h state))
-
-        0x85
-        #_=> (recur (add :l state))
-
-        0x86
-        #_=> (recur (add :m state))
-
-        0x87
-        #_=> (recur (add :a state))
-
-        0x88
-        #_=> (recur (adc :b state))
-
-        0x89
-        #_=> (recur (adc :c state))
-
-        0x8a
-        #_=> (recur (adc :d state))
-
-        0x8b
-        #_=> (recur (adc :e state))
-
-        0x8c
-        #_=> (recur (adc :h state))
-
-        0x8d
-        #_=> (recur (adc :l state))
-
-        0x8e
-        #_=> (recur (adc :m state))
-
-        0x8f
-        #_=> (recur (adc :a state))
-
-        0x90
-        #_=> (recur (sub :b state))
-
-        0x91
-        #_=> (recur (sub :c state))
-
-        0x92
-        #_=> (recur (sub :d state))
-
-        0x93
-        #_=> (recur (sub :e state))
-
-        0x94
-        #_=> (recur (sub :h state))
-
-        0x95
-        #_=> (recur (sub :l state))
-
-        0x96
-        #_=> (recur (sub :m state))
-
-        0x97
-        #_=> (recur (sub :a state))
-
-        0x98
-        #_=> (recur (sbb :b state))
-
-        0x99
-        #_=> (recur (sbb :c state))
-
-        0x9a
-        #_=> (recur (sbb :d state))
-
-        0x9b
-        #_=> (recur (sbb :e state))
-
-        0x9c
-        #_=> (recur (sbb :h state))
-
-        0x9d
-        #_=> (recur (sbb :l state))
-
-        0x9e
-        #_=> (recur (sbb :m state))
-
-        0x9f
-        #_=> (recur (sbb :a state))
-
-        0xa0
-        #_=> (recur (ana :b state))
-
-        0xa1
-        #_=> (recur (ana :c state))
-
-        0xa2
-        #_=> (recur (ana :d state))
-
-        0xa3
-        #_=> (recur (ana :e state))
-
-        0xa4
-        #_=> (recur (ana :h state))
-
-        0xa5
-        #_=> (recur (ana :l state))
-
-        0xa6
-        #_=> (recur (ana :m state))
-
-        0xa7
-        #_=> (recur (ana :a state))
-
-        0xa8
-        #_=> (recur (xra :b state))
-
-        0xa9
-        #_=> (recur (xra :c state))
-
-        0xaa
-        #_=> (recur (xra :d state))
-
-        0xab
-        #_=> (recur (xra :e state))
-
-        0xac
-        #_=> (recur (xra :h state))
-
-        0xad
-        #_=> (recur (xra :l state))
-
-        0xae
-        #_=> (recur (xra :m state))
-
-        0xaf
-        #_=> (recur (xra :a state))
-
-        0xb0
-        #_=> (recur (ora :b state))
-
-        0xb1
-        #_=> (recur (ora :c state))
-
-        0xb2
-        #_=> (recur (ora :d state))
-
-        0xb3
-        #_=> (recur (ora :e state))
-
-        0xb4
-        #_=> (recur (ora :h state))
-
-        0xb5
-        #_=> (recur (ora :l state))
-
-        0xb6
-        #_=> (recur (ora :m state))
-
-        0xb7
-        #_=> (recur (ora :a state))
-
-        0xb8
-        #_=> (recur (cmp :b state))
-
-        0xb9
-        #_=> (recur (cmp :c state))
-
-        0xba
-        #_=> (recur (cmp :d state))
-
-        0xbb
-        #_=> (recur (cmp :e state))
-
-        0xbc
-        #_=> (recur (cmp :h state))
-
-        0xbd
-        #_=> (recur (cmp :l state))
-
-        0xbe
-        #_=> (recur (cmp :m state))
-
-        0xbf
-        #_=> (recur (cmp :a state))
-
-        0xc0
-        #_=> (recur (rnz state))
-
-        0xc1
-        #_=> (recur (pop :b state))
-
-        0xc2
-        #_=> (recur (jnz state))
-
-        0xc3
-        #_=> (recur (jmp state))
-
-        0xc4
-        #_=> (recur (cnz state))
-
-        0xc5
-        #_=> (recur (push :b state))
-
-        0xc6
-        #_=> (recur (adi state))
-
-        0xc7
-        #_=> (recur (rst 0 state))
-
-        0xc8
-        #_=> (recur (rz state))
-
-        0xc9
-        #_=> (recur (ret state))
-
-        0xca
-        #_=> (recur (jz state))
-
-        ;; 0xcb
-        ;; deliberately undefined
-
-        0xcc
-        #_=> (recur (cz state))
-
-        0xcd
-        #_=> (recur (call state))
-
-        0xce
-        #_=> (recur (aci state))
-
-        0xcf
-        #_=> (recur (rst 1 state))
-
-        0xd0
-        #_=> (recur (rnc state))
-
-        0xd1
-        #_=> (recur (pop :d state))
-
-        0xd2
-        #_=> (recur (jnc state))
-
-        0xd3
-        #_=> (recur (out state))
-
-        0xd4
-        #_=> (recur (cnc state))
-
-        0xd5
-        #_=> (recur (push :d state))
-
-        0xd6
-        #_=> (recur (sui state))
-
-        0xd7
-        #_=> (recur (rst 2 state))
-
-        0xd8
-        #_=> (recur (rc state))
-
-        ;; 0xd9
-        ;; deliberately undefined
-
-        0xda
-        #_=> (recur (jc state))
-
-        0xdb
-        #_=> (recur (in state))
-
-        0xdc
-        #_=> (recur (cc state))
-
-        ;; 0xdd
-        ;; deliberately undefined
-
-        0xde
-        #_=> (recur (sbi state))
-
-        0xdf
-        #_=> (recur (rst 3 state))
-
-        0xe0
-        #_=> (recur (rpo state))
-
-        0xe1
-        #_=> (recur (pop :h state))
-
-        0xe2
-        #_=> (recur (jpo state))
-
-        0xe3
-        #_=> (recur (xthl state))
-
-        0xe4
-        #_=> (recur (cpo state))
-
-        0xe5
-        #_=> (recur (push :h state))
-
-        0xe6
-        #_=> (recur (ani state))
-
-        0xe7
-        #_=> (recur (rst 4 state))
-
-        0xe8
-        #_=> (recur (rpe state))
-
-        0xe9
-        #_=> (recur (pchl state))
-
-        0xea
-        #_=> (recur (jpe state))
-
-        0xeb
-        #_=> (recur (xchg state))
-
-        0xec
-        #_=> (recur (cpe state))
-
-        ;; 0xed
-        ;; deliberately undefined
-
-        0xee
-        #_=> (recur (xri state))
-
-        0xef
-        #_=> (recur (rst 5 state))
-
-        0xf0
-        #_=> (recur (rp state))
-
-        0xf1
-        #_=> (recur (pop :psw state))
-
-        0xf2
-        #_=> (recur (jp state))
-
-        0xf3
-        #_=> (recur (di state))
-
-        0xf4
-        #_=> (recur (cp state))
-
-        0xf5
-        #_=> (recur (push :psw state))
-
-        0xf6
-        #_=> (recur (ori state))
-
-        0xf7
-        #_=> (recur (rst 6 state))
-
-        0xf8
-        #_=> (recur (rm state))
-
-        0xf9
-        #_=> (recur (sphl state))
-
-        0xfa
-        #_=> (recur (jm state))
-
-        0xfb
-        #_=> (recur (ei state))
-
-        0xfc
-        #_=> (recur (cm state))
-
-        ;; 0xfd
-        ;; deliberately undefined
-
-        0xfe
-        #_=> (recur (cpi state))
-
-        0xff
-        #_=> (recur (rst 7 state))
-
-        (throw (Exception. (str "unknown opcode: " (format "0x%x" opcode))))))))
+  (loop [state (-> initial-state
+                   ;; extend memory so that it fills a 16-bit address space?
+                   (assoc :memory (->> (concat memory (repeat 0x00))
+                                       (take 0xffff)
+                                       vec)))]
+    (when debug (inspect-state state))
+    (recur (emulate-step state))))
 
 (defn -main
   "I don't do a whole lot ... yet."
