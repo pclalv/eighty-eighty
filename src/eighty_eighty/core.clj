@@ -37,6 +37,18 @@
 (defn d8-str [n]
   (format "$%02x" n))
 
+(defn inspect-state [state]
+  (-> state
+      (dissoc :memory)
+      (update :cpu #(->> %
+                        (map (fn [[k v]] [k (case k
+                                              :sp (format "$%04x" v)
+                                              :pc (format "$%04x" v)
+                                              (format "$%02x" v))]))
+                        (into {})))
+                         
+      (println)))
+
 (defn byte-str-with-padding
   "prints a string like 01010101"
   [i]
@@ -1046,6 +1058,7 @@
                          (assoc :memory (->> (concat memory (repeat 0x00))
                                              (take 0xffff)
                                              vec)))]
+    (inspect-state state)
     (let [opcode (nth memory pc)]
       (case opcode
         0x00
