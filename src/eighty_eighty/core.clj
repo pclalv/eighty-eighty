@@ -926,8 +926,8 @@
                      :or {op "CALL"
                           cond true}}]
   (let [{:keys [sp pc]} (:cpu state)
-        pc-lo-nybble (bit-shift-right pc 8)
-        pc-hi-nybble (bit-and pc 0xff)
+        pc-lo-nybble (bit-and pc 0xff)
+        pc-hi-nybble (bit-shift-right pc 8)
         adr (if interrupt-handler-adr
               interrupt-handler-adr
               (get-d16-from-pc state))]
