@@ -702,7 +702,6 @@
                     :or {op "RET"
                          cond true}}]
   (let [sp (get-r16 :sp state)
-        memory (:memory state)
         pc-lsb (-> state :memory (nth sp))
         pc-msb (-> state :memory (nth (inc sp)))
         pc' (+ (bit-shift-left pc-msb 8)
