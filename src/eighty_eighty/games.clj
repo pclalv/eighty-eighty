@@ -13,7 +13,7 @@
       clojure.java.io/resource
       slurp-bytes))
 
-(def invaders-bin
+(def invaders
   (-> "invaders/invaders.bin"
       clojure.java.io/resource
       slurp-bytes))
