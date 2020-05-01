@@ -1,23 +1,5 @@
 (ns eighty-eighty.disassembler)
 
-(defn slurp-bytes
-  "Slurp the bytes from a slurpable thing"
-  [f]
-  (clojure.core/with-open [out (java.io.ByteArrayOutputStream.)]
-    (clojure.java.io/copy (clojure.java.io/input-stream f) out)
-    (->> out .toByteArray
-         (mapv #(java.lang.Byte/toUnsignedInt %)))))
-
-(def invaders-h
-  (-> "invaders/invaders.h"
-      clojure.java.io/resource
-      slurp-bytes))
-
-(def invaders-bin
-  (-> "invaders/invaders.bin"
-      clojure.java.io/resource
-      slurp-bytes))
-
 (def all-opcodes
   "master list generated from http://www.emulator101.com/8080-by-opcode.html"
   (->> (-> "opcodes.txt"
