@@ -1824,6 +1824,12 @@
 
       (throw (Exception. (str "unknown opcode: " (format "0x%x" opcode)))))))
 
+(defn emulate-n [n]
+  (->> emulate-step
+       (repeat)
+       (take n)
+       (apply comp)))
+
 ;; TODO: test this function with Space Invaders
 ;; > the program gets stuck in this infinite loop
 (defn emulate [memory & {:keys [debug]}]
