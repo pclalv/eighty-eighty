@@ -1,6 +1,6 @@
-(ns eighty-eighty.core-test
+(ns eighty-eighty.cpu-test
   (:require [clojure.test :refer :all]
-            [eighty-eighty.core :refer :all]))
+            [eighty-eighty.cpu :refer :all]))
 
 ;; TODO: test more opcode fns. this site seems to have good examples:
 ;; https://www.geeksforgeeks.org/rotate-instructions-in-8085/
