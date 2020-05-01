@@ -1049,6 +1049,7 @@
       (update-in [:cpu :pc] inc)))
 
 (defn emulate-step [state]
+  (when debug (inspect-state state))
   (let [{:keys [memory cpu]} state
         pc (:pc cpu)
         opcode (nth memory pc)]
@@ -1831,7 +1832,6 @@
                    (assoc :memory (->> (concat memory (repeat 0x00))
                                        (take 0xffff)
                                        vec)))]
-    (when debug (inspect-state state))
     (recur (emulate-step state))))
 
 (defn -main
