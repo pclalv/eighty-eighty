@@ -715,8 +715,6 @@
         ;; unlike subtraction operations, cmp does not affect a
         (assoc-in [:cpu :a] a))))
 
-;; FIXME: there's something fucky about this return fn. my code and
-;; https://bluishcoder.co.nz/js8080/ diverge right after instruction 1545
 (defn ret [state & {:keys [op cond]
                     :or {op "RET"
                          cond true}}]
@@ -929,8 +927,6 @@
 (defn jpo [state]
   (jmp state :op "JPO" :cond (= 0 (-> state :flags :p))))
 
-;; or is there something fucky about how we push onto the stack in
-;; here?
 (defn call [state & {:keys [op cond interrupt-handler-adr]
                      :or {op "CALL"
                           cond true}}]
