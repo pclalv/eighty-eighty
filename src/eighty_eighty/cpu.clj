@@ -725,7 +725,7 @@
         pc-msb (-> state :memory (nth (inc sp)))
         pc' (+ (bit-shift-left pc-msb 8)
                pc-lsb)]
-    (when debug (println op (d16-str pc')))
+    (when debug (println op))
     (if cond
       (-> state
           (assoc-in [:cpu :pc] pc')
