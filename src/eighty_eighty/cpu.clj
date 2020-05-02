@@ -721,11 +721,8 @@
                     :or {op "RET"
                          cond true}}]
   (let [sp (get-r16 :sp state)
-        _ (prn "sp" (d16-str sp))
         pc-lsb (-> state :memory (nth sp))
         pc-msb (-> state :memory (nth (inc sp)))
-        _ (prn "pc-lsb" (d8-str pc-lsb)
-               "pc-msb" (d8-str pc-msb))
         pc' (+ (bit-shift-left pc-msb 8)
                pc-lsb)]
     (when debug (println op (d16-str pc')))
@@ -938,7 +935,6 @@
                      :or {op "CALL"
                           cond true}}]
   (let [{:keys [sp pc]} (:cpu state)
-        _ (prn "call pc" (d16-str pc))
         pc-lo-nybble (bit-and pc 0xff)
         pc-hi-nybble (bit-shift-right pc 8)
         adr (if interrupt-handler-adr
