@@ -1836,7 +1836,7 @@
        (first)))
 
 ;; TODO: hackily test a la http://www.emulator101.com/full-8080-emulation.html
-(defn emulate [memory & {:keys [debug]}]
+(defn emulate [memory]
   (loop [state (-> initial-state
                    ;; extend memory so that it fills a 16-bit address space?
                    (assoc :memory (->> (concat memory (repeat 0x00))
