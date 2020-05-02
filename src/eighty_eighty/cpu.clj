@@ -1008,13 +1008,13 @@
 (defn di [state]
   (when debug (println "DI"))
   (-> state
-      (assoc-in [:cpu :interrupt-enabled] false)
+      (assoc-in :interrupt-enabled false)
       (update-in [:cpu :pc] inc)))
 
 (defn ei [state]
   (when debug (println "EI"))
   (-> state
-      (assoc-in [:cpu :interrupt-enabled] true)
+      (assoc :interrupt-enabled true)
       (update-in [:cpu :pc] inc)))
 
 (defn xthl [state]
