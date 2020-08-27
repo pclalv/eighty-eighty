@@ -22,6 +22,8 @@
    :c 0
    :d 0
    :e 0
+   :h 0
+   :l 0
    :pc 0
    :sp 0})
 
@@ -122,6 +124,20 @@
         adr-msb (-> state :memory (nth (-> pc inc inc)))]
     (+ (bit-shift-left adr-msb 8)
        adr-lsb)))
+
+(defn +d16
+  ([minuend]
+   (+d16 minuend 1))
+  ([minuend subtrahend]
+   (->> (+ minuend subtrahend)
+        (bit-and 0xffff))))
+
+(defn -d16
+  ([minuend]
+   (-d16 minuend 1))
+  ([minuend subtrahend]
+   (->> (- minuend subtrahend)
+        (bit-and 0xffff))))
 
 ;;;;;;;;;;;
 ;; flags ;;
@@ -727,9 +743,9 @@
     (if cond
       (-> state
           (assoc-in [:cpu :pc] pc')
-          (update-in [:cpu :sp] + 2))
+          (update-in [:cpu :sp] +d16 2))
       (-> state
-          (update-in [:cpu :pc] inc)))))
+          (update-in [:cpu :pc] +d16)))))
 
 (defn flag-c? [state]
   (= 1 (-> state :flags :cy)))
@@ -877,8 +893,8 @@
         ;; probably it'd've been best to implement :flags as the :f
         ;; register, and use `bit-set` and `bit-clear` accordingly.
         (assoc-in-cpu-r16 r16 d16-msb d16-lsb)
-        (update-in [:cpu :sp] + 2)
-        (update-in [:cpu :pc] inc))))
+        (update-in [:cpu :sp] +d16 2)
+        (update-in [:cpu :pc] +d16))))
 
 (defn jmp [state & {:keys [op cond]
                     :or {op "JMP"
@@ -977,10 +993,10 @@
         [msb lsb] (get-r16 r16 state :split? true)]
     (when debug (println "PUSH" (-> r16 name clojure.string/upper-case)))
     (-> state
-        (assoc-in [:memory (-> sp dec)] msb)
-        (assoc-in [:memory (-> sp dec dec)] lsb)
-        (update-in [:cpu :sp] - 2)
-        (update-in [:cpu :pc] inc))))
+        (assoc-in [:memory (->> sp dec (bit-and 0xffff))] msb)
+        (assoc-in [:memory (->> sp dec dec (bit-and 0xffff))] lsb)
+        (update-in [:cpu :sp] -d16 2)
+        (update-in [:cpu :pc] +d16))))
 
 (defn rst [exp state]
   (call state
