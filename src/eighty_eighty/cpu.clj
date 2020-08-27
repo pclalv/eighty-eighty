@@ -905,7 +905,7 @@
       (-> state
           (assoc-in [:cpu :pc] pc'))
       (-> state
-          (update-in [:cpu :pc] + 3)))))
+          (update-in [:cpu :pc] +d16 3)))))
 
 (defn jc [state]
   (jmp state
@@ -1008,26 +1008,26 @@
   (let []
     (when debug (println "OUT"))
     (-> state
-        (update-in [:cpu :pc] + 2))))
+        (update-in [:cpu :pc] +d16 2))))
 
 (defn in [state]
   ;; FIXME
   (let []
     (when debug (println "IN"))
     (-> state
-        (update-in [:cpu :pc] + 2))))
+        (update-in [:cpu :pc] +d16 2))))
 
 (defn di [state]
   (when debug (println "DI"))
   (-> state
-      (assoc-in :interrupt-enabled false)
-      (update-in [:cpu :pc] inc)))
+      (assoc :interrupt-enabled false)
+      (update-in [:cpu :pc] +d16)))
 
 (defn ei [state]
   (when debug (println "EI"))
   (-> state
       (assoc :interrupt-enabled true)
-      (update-in [:cpu :pc] inc)))
+      (update-in [:cpu :pc] +d16)))
 
 (defn xthl [state]
   (let [sp (-> state :cpu :sp)]
@@ -1037,7 +1037,7 @@
         (assoc-in [:cpu :h] (-> state :memory (nth (inc sp))))
         (assoc-in [:memory sp] (-> state :cpu :l))
         (assoc-in [:memory (inc sp)] (-> state :cpu :h))
-        (update-in [:cpu :pc] inc))))
+        (update-in [:cpu :pc] +d16))))
 
 (defn pchl [state]
   (let [hl (get-r16 :h state)]
@@ -1053,14 +1053,14 @@
         (assoc-in [:cpu :h] (-> state :cpu :d))
         (assoc-in [:cpu :e] (-> state :cpu :l))
         (assoc-in [:cpu :d] (-> state :cpu :h))
-        (update-in [:cpu :pc] inc))))
+        (update-in [:cpu :pc] +d16))))
 
 (defn sphl [state]
   (let [hl (get-r16 :h state)]
     (when debug (println "SPHL"))
     (-> state
         (assoc-in [:cpu :sp] hl)
-        (update-in [:cpu :pc] inc))))
+        (update-in [:cpu :pc] +d16))))
 
 (defn hlt []
   (println "HLT"))
@@ -1068,7 +1068,7 @@
 (defn nop [state]
   (when debug (println "NOP"))
   (-> state
-      (update-in [:cpu :pc] inc)))
+      (update-in [:cpu :pc] +d16)))
 
 (defn emulate-step [state]
   (when debug (inspect-state state))
