@@ -724,6 +724,24 @@
 
 (deftest cpi-test
   (testing "return value"
+    (is (= {:cpu {:a 0xf5
+                  :pc 0x02}
+            :flags {:z 0
+                    :s 1
+                    :p 1
+                    ;; the Carry bit will be set if [...] the immediate
+                    ;; data is greater than the contents of the
+                    ;; accumulator, and reset otherwise.
+                    :cy 0
+                    :ac 0}
+            :memory [0xfe 0x00]}
+           (cpi {:cpu {:a 0xf5
+                       :pc 0x00}
+                 :flags {:z 0
+                         :s 1
+                         :p 1
+                         :cy 1}
+                 :memory [0xfe 0x00]})))
     (is (= {:cpu {:a 0x4a
                   :pc 0x02}
             :flags {:z 0
@@ -734,4 +752,5 @@
             :memory [0xfe 0x40]}
            (cpi {:cpu {:a 0x4a
                        :pc 0x00}
+                 :flags {:cy 0}
                  :memory [0xfe 0x40]})))))

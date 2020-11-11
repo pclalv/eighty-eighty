@@ -428,18 +428,22 @@
                (recur (inc pc)))
 
         0x50
-        #_=> (clojure.core/let []
+        #_=> (let []
                (clojure.core/println "MOV D,B")
                (recur (clojure.core/inc pc)))
 
         0x51
-        #_=> (clojure.core/let []
+        #_=> (let []
                (clojure.core/println "MOV D,C")
                (recur (clojure.core/inc pc)))
 
         0x54
         #_=> (let []
                (println "MOV D,H")
+               (recur (inc pc)))
+
+        0x55 (let []
+               (println "MOV D,L")
                (recur (inc pc)))
 
         0x56

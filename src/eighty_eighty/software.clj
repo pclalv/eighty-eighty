@@ -33,3 +33,10 @@
                  slurp-bytes)
         padding (take 0x100 (repeat 0))]
     (vec (concat padding raw))))
+
+(def exer
+  (let [raw (->> "8080exer/8080EXER.COM"
+                 clojure.java.io/resource
+                 slurp-bytes)
+        padding (take 0x100 (repeat 0))]
+    (vec (concat padding raw))))

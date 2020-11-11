@@ -3,6 +3,8 @@
 
 (def debug true)
 
+(def *cpudiag* true)
+
 ;; FIXME: in general, it's not correct to implement flags with this
 ;; map alone. it's possible to lose data when calling POP/PUSH.
 (def flags
@@ -819,6 +821,12 @@
                 false {true "ACI"
                        false "ADI"}} subtract?) with-carry?))]
     (when debug (println op (d8-str d8)))
+    ;; (do
+    ;;   (println "debug")
+    ;;   (println "addends" addends)
+    ;;   (println "cy" (apply flag-cy addends))
+    ;;   (println "bit-flip cy" (bit-flip-lsb (apply flag-cy addends)))
+    ;;   (println "debug"))
     (-> state
         (assoc-in [:cpu :a] (bit-and result 0xff))
         (update-in [:cpu :pc] + 2)
@@ -852,6 +860,10 @@
   (let [a (get-r8 :a state)]
     (-> state
         (adi* :subtract? true
+              ;; the cpudiag test for CPI seems to fail, so i think
+              ;; that my CPI fn is broken. i've attempted to reproduce
+              ;; its test case in the test file (it's the first
+              ;; assertion).
               :op "CPI")
         (assoc-in [:cpu :a] a))))
 
@@ -901,7 +913,9 @@
                          cond true}}]
   (let [pc' (get-d16-from-pc state)]
     (when debug (println op (d16-str pc')))
-    (if cond
+    ;; if cond is nil, then jmp was called directly and we want to
+    ;; jump unconditionally
+    (if (or (nil? cond) cond)
       (-> state
           (assoc-in [:cpu :pc] pc'))
       (-> state
@@ -943,6 +957,21 @@
 (defn jpo [state]
   (jmp state :op "JPO" :cond (= 0 (-> state :flags :p))))
 
+(defn cpudiag-print [state]
+  (let [print-buffer-adr (get-r16 :d state)
+        ;; skip the prefix bytes
+        offset 0
+        start-of-printable-bytes (+ print-buffer-adr offset)]
+    (loop [[this & print-buffer] (->> state
+                                      :memory
+                                      (drop start-of-printable-bytes))]
+      (let [this-char (-> this char)]
+        (if (= \$ this-char)
+          (println)
+          (do (print this-char)
+              (recur print-buffer)))))
+    state))
+
 (defn call [state & {:keys [op cond interrupt-handler-adr]
                      :or {op "CALL"
                           cond true}}]
@@ -954,14 +983,20 @@
               interrupt-handler-adr
               (get-d16-from-pc state))]
     (when debug (println op (d16-str adr)))
-    (if cond
+    (if (= adr 5)
       (-> state
-          (assoc-in [:memory (-> sp dec)] pc-hi-nybble)
-          (assoc-in [:memory (-> sp dec dec)] pc-lo-nybble)
-          (assoc-in [:cpu :pc] adr)
-          (update-in [:cpu :sp] - 2))
-      (-> state
-          (update-in [:cpu :pc] + 3)))))
+          (cpudiag-print)
+          (update-in [:cpu :pc] +d16 3))
+      (if cond
+        (-> state
+            (assoc-in [:memory (->> sp dec (bit-and 0xffff))]
+                      pc-hi-nybble)
+            (assoc-in [:memory (->> sp dec dec (bit-and 0xffff))]
+                      pc-lo-nybble)
+            (assoc-in [:cpu :pc] adr)
+            (update-in [:cpu :sp] -d16 2))
+        (-> state
+            (update-in [:cpu :pc] +d16 3))))))
 
 (defn cc [state]
   (call state :op "CC" :cond (flag-c? state)))
@@ -1070,11 +1105,14 @@
   (-> state
       (update-in [:cpu :pc] +d16)))
 
-(defn emulate-step [state]
-  (when debug (inspect-state state))
+;(defn emulate-step [state]
+  (when debug
+    (inspect-state state))
   (let [{:keys [memory cpu]} state
         pc (:pc cpu)
         opcode (nth memory pc)]
+    (when debug
+      (println "opcode" (d8-str opcode)))
     (case opcode
       0x00
       #_=> (nop state)
@@ -1662,7 +1700,7 @@
       #_=> (jnz state)
 
       0xc3
-      #_=> (jmp state)
+      #_=> (jmp state :cond true)
 
       0xc4
       #_=> (cnz state)
@@ -1846,7 +1884,7 @@
 
       (throw (Exception. (str "unknown opcode: " (format "0x%x" opcode)))))))
 
-(defn emulate-n [n memory]
+;(defn emulate-n [n memory]
   (->> (iterate emulate-step memory)
        (drop n)
        (first)))
@@ -1855,6 +1893,7 @@
 (defn emulate [memory]
   (loop [state (-> initial-state
                    ;; extend memory so that it fills a 16-bit address space?
+                   ;; todo: make the first 2K read-only
                    (assoc :memory (->> (concat memory (repeat 0x00))
                                        (take 0xffff)
                                        vec)))]
